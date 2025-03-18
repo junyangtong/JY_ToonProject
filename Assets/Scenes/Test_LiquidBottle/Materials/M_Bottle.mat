@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Bottle
+  m_Shader: {fileID: 4800000, guid: 5129d8fda8707ac4e98a626b930a3681, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3001
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MatCapTex:
+        m_Texture: {fileID: 2800000, guid: 3207ffa2129479f489d48e81b77cb351, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _NormalInt: 0
+    - _NormalUVScale: 1
+    - _Opacity: 1
+    - _WarpInt_BG: 0.083
+    m_Colors:
+    - _BGTint: {r: 1, g: 1, b: 1, a: 1}
+    - _MatCapTint: {r: 1.4980391, g: 1.2684397, b: 0.87185884, a: 1}
+  m_BuildTextureStacks: []

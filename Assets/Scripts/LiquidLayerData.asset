@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94f4534d713902748a1458794ef198ff, type: 3}
+  m_Name: LiquidLayerData
+  m_EditorClassIdentifier: 
+  liquidLayers:
+  - layerName: 0
+    color: {r: 0.5728863, g: 0.047169685, b: 1, a: 0}
+    texture: {fileID: 0}
+    lerpRange: 0.354
+  - layerName: 1
+    color: {r: 0, g: 0.8613167, b: 1, a: 0}
+    texture: {fileID: 0}
+    lerpRange: 0.406
+  - layerName: 2
+    color: {r: 0.10062516, g: 1, b: 0, a: 0}
+    texture: {fileID: 0}
+    lerpRange: 0.435
+  - layerName: 3
+    color: {r: 1, g: 0.7076418, b: 0, a: 0}
+    texture: {fileID: 0}
+    lerpRange: 0.465
+  - layerName: 4
+    color: {r: 1, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
+    lerpRange: 0.306

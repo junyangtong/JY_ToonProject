@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Liquid
+  m_Shader: {fileID: 4800000, guid: 834932bccdc712a45b9ab3db6ed6b888, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _BFRONTMODE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BubbleTex:
+        m_Texture: {fileID: 2800000, guid: 138271704e030c44ab5c71b7c1ab63c0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HeightMap:
+        m_Texture: {fileID: 2800000, guid: c27e0f81780a74d4684359f2c4eb351d, type: 3}
+        m_Scale: {x: 0.5, y: 0.5}
+        m_Offset: {x: 4, y: 4}
+    - _LayerWarpTex:
+        m_Texture: {fileID: 2800000, guid: e1a960155c32ac149888b3e8912fbb91, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LerpWarpTex:
+        m_Texture: {fileID: 2800000, guid: e1a960155c32ac149888b3e8912fbb91, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskTex:
+        m_Texture: {fileID: 2800000, guid: a4f57e406170800428cef1fdfd9eceb4, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskTex2DArr:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MatCapTex:
+        m_Texture: {fileID: 2800000, guid: 3207ffa2129479f489d48e81b77cb351, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlxTex:
+        m_Texture: {fileID: 2800000, guid: 138271704e030c44ab5c71b7c1ab63c0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BubbleInt: 3
+    - _BubblePlxBias: 0.1
+    - _CullMode: 0
+    - _DstBlend: 0
+    - _EdgeWidth: 0.05
+    - _FresnelPow: 2
+    - _HeightScale: 0
+    - _HeightWarpInt: 0.05
+    - _LayerNum: 3
+    - _LayerWarpInt: 1
+    - _LerpWarpInt: 1
+    - _LiquidHeight01: 0
+    - _MaskInt: 2
+    - _MaskRowNum: 3
+    - _MaskScale: 3
+    - _MaskUVScale: 3
+    - _MaxLiquidHeight: 2
+    - _MaxLiquidHeightOS: 2
+    - _PlxBias: 0.1
+    - _PlxMaskInt: 10
+    - _RimInt: 2
+    - _SrcBlend: 1
+    - _bFrontMode: 1
+    - _bPLaneMode: 0
+    - testID: 0
+    m_Colors:
+    - _Bubble_SV: {r: 2, g: 4, b: 0, a: 5}
+    - _HeightMap_SV: {r: 0.5, g: 0.5, b: 4, a: 4}
+    - _MatCapTint: {r: 1, g: 1, b: 1, a: 1}
+    - _PlxST: {r: 2, g: 4, b: 0, a: 8}
+  m_BuildTextureStacks: []
+--- !u!114 &4187287379178582009
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7

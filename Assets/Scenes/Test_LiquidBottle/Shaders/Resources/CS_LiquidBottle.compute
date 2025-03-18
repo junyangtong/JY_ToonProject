@@ -1,0 +1,29 @@
+Texture2DArray<half> _SrcMaskTex2DArr;
+Texture2D<half> _DstMaskTex2D;
+RWTexture2DArray<half> _OutMaskTex2DArr;
+RWTexture2D<half> _OutTex2D;
+
+// 求平均
+uint _LayerNum;
+#pragma kernel AverageMask
+[numthreads(32, 32, 1)]
+void AverageMask(uint2 id : SV_DispatchThreadID)
+{
+	half temp = 0;
+	[loop]
+	for (uint i = 0; i < _LayerNum; i++)
+	{
+		temp += _SrcMaskTex2DArr[uint3(id, i)];
+	}
+	_OutTex2D[id] = temp / _LayerNum;
+}
+
+// 插值
+half _Lerp01;
+#pragma kernel LerpMask
+[numthreads(32, 32, 1)]
+void LerpMask(uint3 id : SV_DispatchThreadID)
+{
+	_OutMaskTex2DArr[id] = lerp(_SrcMaskTex2DArr[id], _DstMaskTex2D[id.xy], _Lerp01);
+}
+
