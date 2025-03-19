@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-//using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace JY.Toon.Bartending
 {
@@ -75,7 +75,7 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetInt("_MaxLayers", maxLayers);
                 liquidMaterial.SetFloat("_LiquidHeight01", liquidHeight01);
                 liquidMaterial.SetColorArray("_LiquidLayerColor", layerColors);
-                liquidMaterial.SetFloatArray("_LiquidLayerLerp", layerLerps);
+                liquidMaterial.SetFloatArray("_LiquidLayerLerpRange", layerLerps);
                 liquidMaterial.SetFloatArray("_LiquidLayerIsMaked", layerIsMaked);
                 
                 Debug.Log($"设置着色器参数: _MaxLayers={maxLayers}");
@@ -86,11 +86,6 @@ namespace JY.Toon.Bartending
             }
         }
         
-        private void UpdateLiquidHeight(float value)
-        {
-            liquidHeight01 = value;
-            UpdateShaderProperties();
-        }
         /// <summary>
         /// 倒入液体
         /// </summary>
@@ -124,7 +119,11 @@ namespace JY.Toon.Bartending
                 currentHeight, 
                 nextHeight, 
                 liquidPourDuration, 
-                UpdateLiquidHeight
+                (float value) =>
+                {
+                    liquidHeight01 = value;
+                    UpdateShaderProperties();
+                }
             );
             
             Debug.Log($"倒入第 {currentLayer} 层液体");
@@ -148,7 +147,11 @@ namespace JY.Toon.Bartending
                     liquidHeight01, 
                     0f, 
                     liquidPourDuration, 
-                    UpdateLiquidHeight
+                    (float value) =>
+                    {
+                        liquidHeight01 = value;
+                        UpdateShaderProperties();
+                    }
                 );
             }
             

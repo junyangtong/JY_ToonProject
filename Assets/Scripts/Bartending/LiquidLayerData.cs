@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "LiquidLayerData", menuName = "调酒/液体层数据")]
+[CreateAssetMenu(fileName = "LiquidLayerData", menuName = "Bartending/LiquidData")]
 public class LiquidLayerData : ScriptableObject
 {
     [System.Serializable]
@@ -15,7 +15,9 @@ public class LiquidLayerData : ScriptableObject
         public float lerpRange = 0.15f; // 渐变程度
     }
 
-    public List<LiquidLayer> liquidLayers = new List<LiquidLayer>(); // 液体层列表
+    // 液体层列表
+    [SerializeField] 
+    private List<LiquidLayer> liquidLayers = new List<LiquidLayer>();
 
     public int GetLayerCount()
     {
@@ -43,9 +45,9 @@ public class LiquidLayerData : ScriptableObject
     {
         if (index >= 0 && index < liquidLayers.Count)
         {
-            return 0f;
+            return liquidLayers[index].lerpRange;
         }
-        return liquidLayers[index].lerpRange;
+        return 0.15f;
     }
 
 } 

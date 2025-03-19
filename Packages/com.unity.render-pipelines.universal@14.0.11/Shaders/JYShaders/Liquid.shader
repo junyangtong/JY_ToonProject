@@ -2,10 +2,10 @@ Shader "JY/Toon/Liquid"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Color", Color) = (1,1,1,1)
-        _MaxLiquidHeight("液面最大高度", Float) = 1.0
-        _LiquidHeightOffset ("液面高度矫正", Float)  = 0.0
+        _NoiseTex ("Noise R:LayerWarp G: B: A:", 2D) = "black" {}
+        _LayerWarpInt ("LayerWarpInt", Range(0, 1)) = 0.5
+        _MaxLiquidHeight("MaxLiquidHeight", Float) = 1.0
+        _LiquidHeightOffset ("LiquidHeightOffset", Float)  = 0.0
     }
     
     SubShader
@@ -24,18 +24,17 @@ Shader "JY/Toon/Liquid"
             #define MAX_LAYER 5
 
             CBUFFER_START(UnityPerMaterial)
-            half4 _MainTex_ST;
-            half4 _Color;
             half _MaxLiquidHeight;
             half _LiquidHeightOffset;
+            half _LayerWarpInt;
             CBUFFER_END
 
             half4 _LiquidLayerColor[MAX_LAYER];
             half _LiquidLayerIsMaked[MAX_LAYER];
-            half _LiquidLayerLerp[MAX_LAYER];
+            half _LiquidLayerLerpRange[MAX_LAYER];
             half _LiquidHeight01;
 
-            TEXTURE2D(_MainTex);    SAMPLER(sampler_MainTex);
+            TEXTURE2D(_NoiseTex);    SAMPLER(sampler_NoiseTex);
 
             struct Attributes
             {
@@ -54,32 +53,45 @@ Shader "JY/Toon/Liquid"
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-                output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
-                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.positionOS = input.positionOS.xyz;
+                output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
+                output.positionCS = TransformWorldToHClip(output.positionWS);
+                output.uv = input.uv;
                 return output;
             }
             
             float4 frag(Varyings input) : SV_Target
             {
+                // 采样噪声图集
+                half4 noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, input.uv);
+
                 // 计算相对坐标
                 float3 originPos = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
                 float3 relativePos = input.positionWS.xyz - originPos;
 
                 // 高度裁剪
-                float liquidHeightOS = _LiquidHeight01 + _LiquidHeightOffset;
+                float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset;
                 float clipPos = liquidHeightOS - relativePos.y;
                 clip(clipPos);
                 
                 // 获取每层液体的id
-                /* relativePos.y => _LiquidHeight01
-                int idCurrent = floor(relativePos.y
- */
-                // 计算颜色
-                half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
+                float liquidHeight0Max = relativePos.y / _MaxLiquidHeight * MAX_LAYER;
+                int idCurrent = floor(liquidHeight0Max - 0.5);
+                int idNext = idCurrent + 1;
+                
+                // 混合颜色
+                half4 colorCurrent = _LiquidLayerColor[idCurrent];
+                half4 colorNext = _LiquidLayerColor[idNext];
+                half lerpRange = _LiquidLayerLerpRange[idCurrent];
+                half lerp01 = smoothstep(idNext - 0.4, idNext + 0.4, liquidHeight0Max);
+                half layerWarpMask = 1.0 - abs(lerp01 - 0.5) * 2.0;
+                lerp01 = lerp01 + (noise.x - 0.5) * _LayerWarpInt * layerWarpMask;
+                half4 colorMixed = lerp(colorCurrent, colorNext, lerp01);
+                
+                // 遮罩
+                half mask = _LiquidLayerIsMaked[idCurrent];
 
-                return color;
+                return colorMixed;
             }
             ENDHLSL
         }

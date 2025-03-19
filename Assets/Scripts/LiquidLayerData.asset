@@ -15,21 +15,21 @@ MonoBehaviour:
   liquidLayers:
   - layerName: 0
     color: {r: 0.5728863, g: 0.047169685, b: 1, a: 0}
-    texture: {fileID: 0}
-    lerpRange: 0.354
+    isMaked: 0
+    lerpRange: 0.165
   - layerName: 1
     color: {r: 0, g: 0.8613167, b: 1, a: 0}
-    texture: {fileID: 0}
-    lerpRange: 0.406
+    isMaked: 1
+    lerpRange: 0.105
   - layerName: 2
     color: {r: 0.10062516, g: 1, b: 0, a: 0}
-    texture: {fileID: 0}
-    lerpRange: 0.435
+    isMaked: 0
+    lerpRange: 0.17
   - layerName: 3
     color: {r: 1, g: 0.7076418, b: 0, a: 0}
-    texture: {fileID: 0}
-    lerpRange: 0.465
+    isMaked: 0
+    lerpRange: 0.15
   - layerName: 4
     color: {r: 1, g: 0, b: 0, a: 0}
-    texture: {fileID: 0}
+    isMaked: 0
     lerpRange: 0.306
