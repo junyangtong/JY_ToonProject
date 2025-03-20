@@ -45,7 +45,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BubbleTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 94b5429bbc39b2846ba852ca99c9e2b2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -72,6 +72,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DirtyTex:
+        m_Texture: {fileID: 2800000, guid: a2645c2d27a238f4a9433891e90736bb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -92,6 +96,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: c27e0f81780a74d4684359f2c4eb351d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -101,7 +109,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: e1a960155c32ac149888b3e8912fbb91, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3f40c4f5bb11dfd498a2ed388fcbe0c3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -135,7 +143,9 @@ Material:
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BubbleInt: 1
+    - _BubbleParallax: 0.3
     - _BubblePlxBias: 0.1
+    - _BubbleSpeed: -1
     - _BumpScale: 1
     - _ClearCoat: 0
     - _ClearCoatMask: 0
@@ -145,6 +155,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
+    - _DirtyInt: 1
     - _DstBlend: 10
     - _DstBlendAlpha: 10
     - _EdgeWidth: 0.05
@@ -184,6 +195,7 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 1
     - _Transparency: 0.8
+    - _Transparent: 1
     - _UVSec: 0
     - _WorkflowMode: 1
     - _ZWrite: 0

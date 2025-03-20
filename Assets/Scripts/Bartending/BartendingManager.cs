@@ -26,7 +26,6 @@ namespace JY.Toon.Bartending
         private Material liquidMaterial;
         private Color[] layerColors;
         private float[] layerLerps;
-        private float[] layerIsMaked;
         private float liquidHeight01;
         private int currentLayer = 0;
 
@@ -42,7 +41,6 @@ namespace JY.Toon.Bartending
             }
             layerColors = new Color[maxLayers];
             layerLerps = new float[maxLayers];
-            layerIsMaked = new float[maxLayers];
 
             if (liquidObject != null)
             {
@@ -76,7 +74,6 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_LiquidHeight01", liquidHeight01);
                 liquidMaterial.SetColorArray("_LiquidLayerColor", layerColors);
                 liquidMaterial.SetFloatArray("_LiquidLayerLerpRange", layerLerps);
-                liquidMaterial.SetFloatArray("_LiquidLayerIsMaked", layerIsMaked);
                 
                 Debug.Log($"设置着色器参数: _MaxLayers={maxLayers}");
             }
@@ -103,9 +100,19 @@ namespace JY.Toon.Bartending
             }
             
             //更新shader数组
-            layerColors[currentLayer] = liquidLayerData.GetLayerColor(currentLayer);
+            if (currentLayer < maxLayers - 1) // 防止做插值时NextColor为默认颜色
+            {
+                Color layerColor = liquidLayerData.GetLayerColor(currentLayer);
+                layerColor.a = liquidLayerData.GetLayerIsMaked(currentLayer) ? 1.0f : 0.0f;
+                layerColors[currentLayer] = layerColors[currentLayer+1] = layerColor;
+            }
+            else
+            {
+                Color layerColor = liquidLayerData.GetLayerColor(currentLayer);
+                layerColor.a = liquidLayerData.GetLayerIsMaked(currentLayer) ? 1.0f : 0.0f;
+                layerColors[currentLayer] = layerColor;
+            }
             layerLerps[currentLayer] = liquidLayerData.GetLayerLerpRange(currentLayer);
-            layerIsMaked[currentLayer] = liquidLayerData.GetLayerIsMaked(currentLayer) ? 1.0f : 0.0f;
             
             // 计算当前层高度和下一层高度
             float currentHeight = (float)currentLayer / maxLayers;
