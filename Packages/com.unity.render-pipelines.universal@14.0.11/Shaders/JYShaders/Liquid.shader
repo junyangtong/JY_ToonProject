@@ -109,8 +109,8 @@ Shader "JY/Toon/Liquid"
                 half4 noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, input.uv);
 
                 // 计算相对坐标
-                float3 originPos = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
-                float3 relativePos = input.positionWS.xyz - originPos;
+                float3 originPosWS = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
+                float3 relativePos = input.positionWS.xyz - originPosWS;
 
                 // 高度裁剪
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset;
@@ -137,18 +137,19 @@ Shader "JY/Toon/Liquid"
                 half bubbleMask = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
                 bubbleUV = input.uv;
                 bubbleUV.y += _Time.x * _BubbleSpeed;
+                    //虚拟液面
+                    // n * (intersectPos - relativeHeight) = 0
+                    // intersectPos = input.positionWS + t * input.viewDirWS
+                    half facing = isFrontFace ? 0.0 : 1.0;
+                    half3 relativeHeight = float3(0, originPosWS.y + liquidHeightOS, 0);
+                    half3 n = float3(0,1,0);
+                    float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, relativeHeight - input.positionWS) / dot(n, input.viewDirWS);
+                    float2 planeUV = intersectPosWS.xz;
+
+                bubbleUV = lerp(bubbleUV, planeUV, facing);
                 bubbleMask += SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
                 half3 bubbleColor = bubbleMask;
-                    //虚拟液面
-                    half facing = isFrontFace ? 1.0 : -1.0;
-                    float relativeHeight = float3(0, originPos.y + liquidHeightOS, 0);
-                    half3 virtualPlaneNormal = float3(0,1,0);
-                     // 计算视线与液面平面的交点
-                    // 平面方程: y = relativeHeight
-                    // 射线方程: intersectPos = input.positionWS + t * input.viewDirWS
-                    // 解t: input.positionWS.y + t * input.viewDirWS.y = relativeHeight
-                    float t = (relativeHeight - input.positionWS.y) / input.viewDirWS.y;
-                    float3 intersectPos = input.positionWS + t * input.viewDirWS;
+
                 // 杂质
                 half dirtyMask = SAMPLE_TEXTURE2D(_DirtyTex, sampler_DirtyTex, input.uv).r;
 
