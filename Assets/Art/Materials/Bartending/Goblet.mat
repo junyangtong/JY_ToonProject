@@ -30,7 +30,7 @@ Material:
   - _SURFACE_TYPE_TRANSPARENT
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 1
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses:
@@ -45,7 +45,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BubbleTex:
-        m_Texture: {fileID: 2800000, guid: a34ef5b735323be46b11468b2383f713, type: 3}
+        m_Texture: {fileID: 2800000, guid: a2cf25c4482d2484badc71691e268161, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -73,7 +73,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DirtyTex:
-        m_Texture: {fileID: 2800000, guid: 9557a75afae512144857866f21bbd232, type: 3}
+        m_Texture: {fileID: 2800000, guid: 11004275970a28048b61f4e07f880a31, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -158,21 +158,21 @@ Material:
     - _DirtyInt: 1
     - _DstBlend: 10
     - _DstBlendAlpha: 10
-    - _EdgeWidth: 0.05
+    - _EdgeWidth: 0.0475
     - _EnvironmentReflections: 1
     - _FillLevel: 1
-    - _FresnelPow: 2
+    - _FresnelPow: 5.12
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossinessSource: 0
     - _GlossyReflections: 1
-    - _HeightWarpInt: 0.05
+    - _HeightWarpInt: 0.19
     - _LayerWarpInt: 0.5
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
     - _LiquidHeight01: 1
     - _LiquidHeight01Offset: 0
-    - _LiquidHeightOffset: 0
+    - _LiquidHeightOffset: 1.2
     - _MaskInt: 1
     - _MaskUVScale: 1
     - _MaxLayers: 5
