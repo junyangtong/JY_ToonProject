@@ -16,22 +16,32 @@ namespace JY.Toon.Bartending
         public static bool IsAnimating => isAnimating;
         
         /// <summary>
-        /// 高度平滑过渡
-        /// <returns></returns>
-        public static async UniTask AnimateFloatAsync(float startHeight, float targetHeight, float duration, Action<float> callback)
+        /// 高度过渡动画
+        /// <summary>
+        public static async UniTask AnimateTwoFloatAsync(float startValue, float targetValue, float duration, Action<float> callback, AnimationCurve curve = null)
         {
             isAnimating = true;
             float elapsedTime = 0f;
-            float currentValue = startHeight;
+            float currentValue = startValue;
             
             while (elapsedTime < duration)
             {
                 float t = elapsedTime / duration;
-                // TODO: 使用动画曲线
-                float smoothT = Mathf.SmoothStep(0f, 1f, t);
-                currentValue = Mathf.Lerp(startHeight, targetHeight, smoothT);
+
+                float smoothT;
                 
-                // 回调更新高度
+                if (curve != null)
+                {
+                    smoothT = curve.Evaluate(t); // 使用动画曲线 
+                }
+                else
+                {
+                    smoothT = Mathf.SmoothStep(0f, 1f, t);
+                }
+                
+                currentValue = Mathf.Lerp(startValue, targetValue, smoothT);
+                
+                // 回调更新
                 callback.Invoke(currentValue);
                 
                 // 等待下一帧
@@ -39,7 +49,43 @@ namespace JY.Toon.Bartending
                 elapsedTime += Time.deltaTime;
             }
             
-            callback.Invoke(targetHeight);
+            callback.Invoke(targetValue);
+            isAnimating = false;
+        }
+
+        /// <summary>
+        /// 波浪过渡动画
+        /// <summary>
+        public static async UniTask AnimateFloatAsync(float duration, Action<float> callback, AnimationCurve curve = null)
+        {
+            isAnimating = true;
+            float elapsedTime = 0f;
+            float currentValue = 0f;
+            
+            while (elapsedTime < duration)
+            {
+                float t = elapsedTime / duration;
+
+                float smoothT;
+                
+                if (curve != null)
+                {
+                    smoothT = curve.Evaluate(t); // 使用动画曲线 
+                }
+                else
+                {
+                    smoothT = 0f;
+                }
+                
+                currentValue = smoothT;
+                
+                // 回调更新
+                callback.Invoke(currentValue);
+                
+                // 等待下一帧
+                await UniTask.Yield();
+                elapsedTime += Time.deltaTime;
+            }
             isAnimating = false;
         }
     }

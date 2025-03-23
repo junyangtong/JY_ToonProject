@@ -20,22 +20,19 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Goblet
-  m_Shader: {fileID: 4800000, guid: c0a06286141be924bbd543f0a66fc7cc, type: 3}
+  m_Name: Goblet 2
+  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _ALPHAPREMULTIPLY_ON
-  - _SURFACE_TYPE_TRANSPARENT
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses:
-  - DepthOnly
-  - SHADOWCASTER
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: 2000
+  stringTagMap:
+    RenderType: Opaque
+  disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -93,7 +90,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: c27e0f81780a74d4684359f2c4eb351d, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
@@ -156,8 +153,8 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DirtyInt: 1
-    - _DstBlend: 10
-    - _DstBlendAlpha: 10
+    - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EdgeWidth: 0.0475
     - _EnvironmentReflections: 1
     - _FillLevel: 1
@@ -186,29 +183,24 @@ Material:
     - _ReceiveShadows: 1
     - _ReflectionSource: 0
     - _RimInt: 0.5
-    - _ShallowRange: -0.04
     - _Shininess: 1
-    - _Smoothness: 0.5
+    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
-    - _Surface: 1
+    - _Surface: 0
     - _Transparency: 0.8
     - _Transparent: 1
     - _UVSec: 0
-    - _WaterLineWidth: 0.08
-    - _WaveAmplitude: 1
-    - _WaveFrequency: 7.14
-    - _WaveInt: 0.23
-    - _WaveSpeed: 4.95
+    - _WaveInt: 1
     - _WorkflowMode: 1
-    - _ZWrite: 0
+    - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5058824}
     - _Bubble_SV: {r: 1, g: 1, b: 0, a: 1}
-    - _Color: {r: 1, g: 0.82052267, b: 0, a: 0.5058824}
+    - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 0.5058824}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HeightMap_SV: {r: 1, g: 1, b: 1, a: 1}
     - _Layer0: {r: 0.5728863, g: 0.047169685, b: 1, a: 0}
