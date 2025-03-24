@@ -4,6 +4,7 @@ Shader "JY/Toon/Liquid"
     {
         _Transparent ("Transparent", Range(0, 1)) = 1.0
         _NoiseTex ("Noise R:LayerWarp G: B: A:", 2D) = "black" {}
+        _CubeMap ("CubeMap", Cube) = "white" {}
         _LayerWarpInt ("LayerWarpInt", Range(0, 1)) = 0.5
         _MaxLiquidHeight("MaxLiquidHeight", Float) = 1.0
         _LiquidHeightOffset ("LiquidHeightOffset", Float)  = 0.0
@@ -63,6 +64,8 @@ Shader "JY/Toon/Liquid"
         TEXTURE2D(_NoiseTex);    SAMPLER(sampler_NoiseTex);
         TEXTURE2D(_BubbleTex);   SAMPLER(sampler_BubbleTex);
         TEXTURE2D(_DirtyTex);    SAMPLER(sampler_DirtyTex);
+        TEXTURECUBE(_CubeMap);   SAMPLER(sampler_CubeMap);
+        TEXTURE2D_ARRAY(_LiquidLayerMaskTex);   SAMPLER(sampler_LiquidLayerMaskTex);
 
         struct Attributes
         {
@@ -132,12 +135,35 @@ Shader "JY/Toon/Liquid"
             float waveHeight = _WaveAmplitude * 0.05 * sin(position.z * _WaveFrequency + time)
                              + _WaveAmplitude * 0.05 * sin(position.x * _WaveFrequency + time);
 
-            float3 normal = float3(0, 1, 0);
 
-            waveInfo.height = waveHeight;
+            float3 T = float3
+            (
+                1.0,
+                _WaveAmplitude * 0.05 * _WaveFrequency * cos(position.x * _WaveFrequency + time) 
+                * _WaveAmplitude * 0.05 * sin(position.z * _WaveFrequency + time),
+                0.0
+            );
+            float3 B = float3
+            (
+                0.0,
+                _WaveAmplitude * 0.05 * _WaveFrequency * sin(position.x * _WaveFrequency + time) 
+                * _WaveAmplitude * 0.05 * cos(position.z * _WaveFrequency + time),
+                1.0
+            );
+
+            float3 N = cross(B, T);
+            float3 normal = normalize(N);
+            
             waveInfo.normal = normal;
+            waveInfo.height = waveHeight;
 
             return waveInfo;
+        }
+
+        // 反射UV
+        float3 GetReflectionUV(float3 normalWS, float3 viewDirWS)
+        {
+            return  reflect(viewDirWS, normalWS);
         }
         
         ENDHLSL
@@ -191,8 +217,11 @@ Shader "JY/Toon/Liquid"
                 half layerWarpMask = 1.0 - abs(lerp01 - 0.5) * 2.0;
                 lerp01 = lerp01 + (noise.x - 0.5) * _LayerWarpInt * layerWarpMask;
                 half4 colorMixed = lerp(currentColor, nextColor, lerp01);
-                
-                
+                // 静态遮罩
+                half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, currentID)).r;
+                half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, nextID)).r;
+                half maskMixed = lerp(mask0, mask1, lerp01);
+
                 // 边缘光
                 half rimMask = _RimInt;
                 // 气泡
@@ -215,13 +244,13 @@ Shader "JY/Toon/Liquid"
                 half mask = colorMixed.a;
                 half3 maskColor = lerp(bubbleColor, dirtyMask * colorMixed.rgb, mask);
 
-                half3 finalColor = colorMixed.rgb;
+                half3 finalColor = colorMixed.rgb + maskMixed.rrr;
                 // 吃水线
                 half waterlineMask = smoothstep(_WaterLineWidth, 0, clipPos);
                 finalColor = lerp(finalColor, finalColor*0.5, waterlineMask);//TODO:优化吃水线效果
                 
                 half alpha = _Transparent * colorMixed.a;
-                return half4(finalColor.rgb, alpha);
+                return half4(finalColor, alpha);
             }
             ENDHLSL
         }
@@ -256,7 +285,7 @@ Shader "JY/Toon/Liquid"
                 // 高度裁剪
                     // 扰动
                     WaveInfo waveInfo = CalculateWave(relativePos);
-                float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;;
+                float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
                 clip(clipPos);
                 
@@ -281,10 +310,10 @@ Shader "JY/Toon/Liquid"
                 half3 n = float3(0,1,0);
                 float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, liquidHeightWS - input.positionWS) / dot(n, input.viewDirWS);
                 // 虚拟平面深度覆盖深度缓冲
-                depthOUT = EyeDepthToLinear01(dot(intersectPosWS - GetCameraPositionWS(), -UNITY_MATRIX_V[2].xyz));
+                float3 planeViewDirWS = intersectPosWS - GetCameraPositionWS();
+                depthOUT = EyeDepthToLinear01(dot(planeViewDirWS, -UNITY_MATRIX_V[2].xyz));
 
-                // 菲涅尔
-                half fresnel = normalize(input.viewDirWS).y;
+               
 
                 // 气泡
                 float2 bubbleUV = input.uv;
@@ -310,8 +339,19 @@ Shader "JY/Toon/Liquid"
                 half4 currentColorMax = _LiquidLayerColor[currentIDMax];
                 finalColor = lerp(finalColor, currentColorMax.rgb, shallowFactor);
                 half alpha = _Transparent * currentColorMax.a;
-                alpha = lerp(alpha*0.2, alpha, shallowFactor);
+                alpha = lerp(alpha*0.8, alpha, shallowFactor);
+
+                float3 center = originPosWS;
+                center.y += liquidHeightOS;
+                float circleDistance = length((intersectPosWS - center).xz);
+                float circleMask = smoothstep(0.8, 1.0, circleDistance);
+                finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb + 0.5, circleMask);//混合深浅颜色
                 
+                // 反射
+                half fresnel = normalize(input.viewDirWS).y;
+                float3 reflectionUV = GetReflectionUV(waveInfo.normal, planeViewDirWS);
+                half4 reflectionColor = SAMPLE_TEXTURECUBE(_CubeMap, sampler_CubeMap, reflectionUV);
+                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel);
                 return half4(finalColor.rgb, alpha);
             }
             ENDHLSL

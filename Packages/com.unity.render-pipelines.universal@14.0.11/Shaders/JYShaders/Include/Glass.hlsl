@@ -37,7 +37,7 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
 
     // Glass
     // 菲涅尔
-    half fresnel = pow(1.0 - saturate(dot(inputData.normalWS, inputData.viewDirectionWS)), _Thinkness);
+    half fresnel = pow(1.0 - saturate(dot(inputData.normalWS, inputData.viewDirectionWS)), _Thinkness + 0.0001);
     
     // 折射效果计算
     float2 screenUV = inputData.normalizedScreenSpaceUV;
@@ -54,7 +54,7 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     
     // Blend
     // 使用Matcap代替主光光照
-    lightingData.mainLightColor = matcapColor.rgb;
+    lightingData.mainLightColor = surfaceData.albedo + matcapColor.rgb;
     lightingData.mainLightColor *= mainLight.shadowAttenuation;
     
     // 计算最终颜色
@@ -65,7 +65,7 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     finalColor = CalculateFinalColor(lightingData, surfaceData.alpha);
     #endif
     
-    finalColor.rgb = lerp(finalColor.rgb, matcapColor.rgb, fresnel);
+    finalColor.rgb = lerp(surfaceData.albedo, finalColor.rgb, fresnel);
     
     finalColor.a = surfaceData.alpha;
     

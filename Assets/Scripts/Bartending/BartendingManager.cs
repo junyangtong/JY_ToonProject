@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
+using UnityEngine.Rendering;
 
 namespace JY.Toon.Bartending
 {
@@ -38,6 +39,8 @@ namespace JY.Toon.Bartending
         private float liquidHeight01 = 0f;
         private int currentLayer = 0;
         private bool shaderNeedUpdate = false;
+        private RenderTexture layerMaskTexArray;
+        private const int maskSize = 256;
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -69,6 +72,8 @@ namespace JY.Toon.Bartending
             layerColors = new Color[maxLayers];
             layerLerps = new float[maxLayers];
 
+            ResetMaskTexArray(maxLayers);
+
             if (liquidObject != null)
             {
                 Renderer renderer = liquidObject.GetComponent<Renderer>();
@@ -99,6 +104,45 @@ namespace JY.Toon.Bartending
             }
         }
 
+        /// <summary>
+        /// 创建Texture2DArray
+        /// </summary>
+        private void CreateMaskTexArray()
+        {
+            layerMaskTexArray = new RenderTexture(
+                maskSize, maskSize, 0, 
+                RenderTextureFormat.R8, RenderTextureReadWrite.Linear
+            );
+            layerMaskTexArray.dimension = TextureDimension.Tex2DArray;
+            layerMaskTexArray.wrapMode = TextureWrapMode.Repeat;
+            layerMaskTexArray.useMipMap = false;
+            layerMaskTexArray.enableRandomWrite = true;
+        }
+        
+        /// <summary>
+        /// 初始化Mask
+        /// </summary>
+        public void ResetMaskTexArray(int layerNum)
+        {
+            if (layerNum > 0)
+            {
+                if (layerMaskTexArray && layerNum != layerMaskTexArray.volumeDepth)
+                {
+                    layerMaskTexArray.Release();
+                }
+                CreateMaskTexArray();
+                layerMaskTexArray.volumeDepth = layerNum;
+                // 初始化Mask
+                for (int i = 0; i < layerMaskTexArray.volumeDepth; i++)
+                {
+                    Graphics.Blit(Texture2D.blackTexture, layerMaskTexArray, 0, i);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 初始化时更新shader参数
+        /// </summary>
         private void InitializeShaderProperties()
         {
             if (liquidMaterial != null)
@@ -111,14 +155,11 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_WaveAmplitude", 0f);
                 liquidMaterial.SetFloat("_WaveFrequency", 1f);
                 liquidMaterial.SetFloat("_WaveSpeed", 1f);
-            }
-            else
-            {
-                Debug.LogError("没有设置杯子材质!");
+                liquidMaterial.SetTexture("_LiquidLayerMaskTex", layerMaskTexArray);
             }
         }
         /// <summary>
-        /// 更新Shader参数
+        /// 每次更新Shader参数
         /// </summary>
         private void UpdateShaderProperties()
         {
@@ -127,13 +168,10 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_LiquidHeight01", liquidHeight01);
                 liquidMaterial.SetColorArray("_LiquidLayerColor", layerColors);
                 liquidMaterial.SetFloatArray("_LiquidLayerLerpRange", layerLerps);
+                liquidMaterial.SetTexture("_LiquidLayerMaskTex", layerMaskTexArray);
                 liquidMaterial.SetFloat("_WaveAmplitude", waveAmplitude);
                 liquidMaterial.SetFloat("_WaveFrequency", waveFrequency);
                 liquidMaterial.SetFloat("_WaveSpeed", waveSpeed);
-            }
-            else
-            {
-                Debug.LogError("没有设置杯子材质!");
             }
         }
         
@@ -152,8 +190,14 @@ namespace JY.Toon.Bartending
                 Debug.Log("正在倒入液体无法添加！");
                 return;
             }
-            
-            //更新shader数组
+            // 更新mask2DArr
+            Texture2D newMask = liquidLayerData.GetLayerMaskTex(currentLayer);
+            Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
+            /* if (currentLayer + 1 < maxLayers) // 使得液面能采到当前层的mask而不为空
+            {
+                Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
+            } */
+            //更新数组
             if (currentLayer < maxLayers - 1) // 防止CurrentColor和NextColor做插值时NextColor为默认颜色，每次填充上面两层
             {
                 Color layerColor = liquidLayerData.GetLayerColor(currentLayer);
@@ -261,6 +305,11 @@ namespace JY.Toon.Bartending
             {
                 resetButton.onClick.AddListener(ResetLiquid);
             }
+        }
+
+        private void OnGUI()
+        {
+            
         }
     }
 }

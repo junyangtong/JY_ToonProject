@@ -10,7 +10,7 @@ public class LiquidLayerData : ScriptableObject
     {
         public string layerName;     // 液体层名称
         public Color color;          // 液体颜色
-        public bool isMaked;        // TODO：为每层增加不同的mask纹理
+        public Texture2D maskTex;    // TODO：为每层增加不同的mask纹理
         [Range(0f, 1f)]
         public float lerpRange = 0.15f; // 渐变程度
     }
@@ -32,13 +32,13 @@ public class LiquidLayerData : ScriptableObject
         }
         return Color.clear;
     }
-    public bool GetLayerIsMaked(int index)
+    public Texture2D GetLayerMaskTex(int index)
     {
         if (index >= 0 && index < liquidLayers.Count)
         {
-            return liquidLayers[index].isMaked;
+            return liquidLayers[index].maskTex;
         }
-        return false;
+        return null;
     }
 
     public float GetLayerLerpRange(int index)

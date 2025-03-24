@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Goblet 1
+  m_Name: Glass
   m_Shader: {fileID: 4800000, guid: 46f84970e701a924fb0bc5c6019a488c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -107,7 +107,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MatCapTex:
-        m_Texture: {fileID: 2800000, guid: 3207ffa2129479f489d48e81b77cb351, type: 3}
+        m_Texture: {fileID: 2800000, guid: d12a223a9963d724a9b196e4a8d6bc84, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -196,7 +196,7 @@ Material:
     - _QueueOffset: 3
     - _ReceiveShadows: 1
     - _ReflectionSource: 0
-    - _RefractIntensity: 0.03
+    - _RefractIntensity: 0.06
     - _RimInt: 0.5
     - _Shininess: 1
     - _Smoothness: 0
@@ -206,7 +206,7 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 1
-    - _Thinkness: 0.76
+    - _Thinkness: 0.81
     - _Transparency: 0.8
     - _Transparent: 1
     - _UVSec: 0
@@ -214,9 +214,9 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.5, g: 0.5, b: 0.5, a: 0}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Bubble_SV: {r: 1, g: 1, b: 0, a: 1}
-    - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 0}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HeightMap_SV: {r: 1, g: 1, b: 1, a: 1}
     - _Layer0: {r: 0.5728863, g: 0.047169685, b: 1, a: 0}
