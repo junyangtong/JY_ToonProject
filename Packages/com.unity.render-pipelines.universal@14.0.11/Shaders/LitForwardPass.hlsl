@@ -5,7 +5,9 @@
 #if defined(LOD_FADE_CROSSFADE)
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
 #endif
-
+#if defined(_GLASS)
+    #include "Packages/com.unity.render-pipelines.universal/Shaders/JYShaders/Include/Glass.hlsl"
+#endif
 // GLES2 has limited amount of interpolators
 #if defined(_PARALLAXMAP) && !defined(SHADER_API_GLES)
 #define REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR
@@ -231,7 +233,12 @@ void LitPassFragment(
     ApplyDecalToSurfaceData(input.positionCS, surfaceData, inputData);
 #endif
 
+#if defined(_GLASS)
+    half4 color = GlassFragment(inputData, surfaceData);
+#else
     half4 color = UniversalFragmentPBR(inputData, surfaceData);
+#endif
+
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
     color.a = OutputAlpha(color.a, IsSurfaceTypeTransparent(_Surface));
 
