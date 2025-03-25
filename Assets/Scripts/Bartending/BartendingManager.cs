@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace JY.Toon.Bartending
 {
@@ -101,23 +102,22 @@ namespace JY.Toon.Bartending
 #region RenderFeature
        // 单独渲染背景和液体
         private LiquidPass liquidPass;
-liquidRenderer
         private void OnEnable()
         {
             liquidPass = new LiquidPass();
+            liquidPass.renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
             RenderPipelineManager.beginCameraRendering += OnBeginCamera;
         }
 
         private void OnDisable()
         {
             RenderPipelineManager.beginCameraRendering -= OnBeginCamera;
-            liquidPass.Dispose();
+            liquidPass.Cleanup();
         }
 
         private void OnBeginCamera(ScriptableRenderContext context, Camera cam)
         {
-            cam.GetUniversalAdditionalCameraData()
-                .scriptableRenderer.EnqueuePass(liquidPass);
+            cam.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(liquidPass);
         }
 #endregion
 #region MaskTexArray

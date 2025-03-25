@@ -423,7 +423,7 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
-  m_AllowMSAA: 1
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
@@ -1663,6 +1663,12 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2534964839176971238, guid: cbb6183dd2b89d3428bb388c752c0361, type: 3}
+--- !u!23 &1276839591 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: cbb6183dd2b89d3428bb388c752c0361,
+    type: 3}
+  m_PrefabInstance: {fileID: 19841038}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1539290620
 GameObject:
   m_ObjectHideFlags: 0
@@ -1693,7 +1699,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   liquidLayerData: {fileID: 11400000, guid: 6bb290341b1c191458f2d2bb3780d2dd, type: 2}
-  liquidObject: {fileID: 1276839586}
+  liquidRenderer: {fileID: 1276839591}
   maxLiquidHeight: 1.93
   defaultLiquidColor: {r: 0.5, g: 0.3, b: 0.1, a: 0.8}
   waveAmplitude: 1
