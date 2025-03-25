@@ -15,7 +15,7 @@ namespace JY.Toon.Bartending
         [SerializeField] private LiquidLayerData liquidLayerData;
         
         [Header("Liquid Setting")]
-        [SerializeField] private GameObject liquidObject;
+        [SerializeField] private Renderer liquidRenderer;
         [SerializeField] private float maxLiquidHeight = 1.0f;
         [SerializeField] private Color defaultLiquidColor = new Color(0.5f, 0.3f, 0.1f, 0.8f);
         [SerializeField] private float waveAmplitude = 0.3f;
@@ -74,18 +74,13 @@ namespace JY.Toon.Bartending
 
             ResetMaskTexArray(maxLayers);
 
-            if (liquidObject != null)
+            if (liquidRenderer != null)
             {
-                Renderer renderer = liquidObject.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    // 获取液体材质
-                    liquidMaterial = renderer.material;
-                }
+                liquidMaterial = liquidRenderer.material;
             }
             else
             {
-                Debug.LogError("<BartendingManager> liquidObject未指定");
+                Debug.LogError("<BartendingManager> liquidRenderer未指定");
             }
             
             // 初始化shader参数
@@ -103,7 +98,29 @@ namespace JY.Toon.Bartending
                 shaderNeedUpdate = false;
             }
         }
+#region RenderFeature
+       // 单独渲染背景和液体
+        private LiquidPass liquidPass;
+liquidRenderer
+        private void OnEnable()
+        {
+            liquidPass = new LiquidPass();
+            RenderPipelineManager.beginCameraRendering += OnBeginCamera;
+        }
 
+        private void OnDisable()
+        {
+            RenderPipelineManager.beginCameraRendering -= OnBeginCamera;
+            liquidPass.Dispose();
+        }
+
+        private void OnBeginCamera(ScriptableRenderContext context, Camera cam)
+        {
+            cam.GetUniversalAdditionalCameraData()
+                .scriptableRenderer.EnqueuePass(liquidPass);
+        }
+#endregion
+#region MaskTexArray
         /// <summary>
         /// 创建Texture2DArray
         /// </summary>
@@ -139,7 +156,7 @@ namespace JY.Toon.Bartending
                 }
             }
         }
-
+#endregion
         /// <summary>
         /// 初始化时更新shader参数
         /// </summary>
@@ -174,7 +191,7 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_WaveSpeed", waveSpeed);
             }
         }
-        
+#region Action
         /// <summary>
         /// 倒入液体
         /// </summary>
@@ -193,10 +210,11 @@ namespace JY.Toon.Bartending
             // 更新mask2DArr
             Texture2D newMask = liquidLayerData.GetLayerMaskTex(currentLayer);
             Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
-            /* if (currentLayer + 1 < maxLayers) // 使得液面能采到当前层的mask而不为空
+            if (currentLayer < maxLayers - 1) // 使得液面能采到当前层的mask而不为空，每次填充上面两层
             {
                 Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
-            } */
+            }
+
             //更新数组
             if (currentLayer < maxLayers - 1) // 防止CurrentColor和NextColor做插值时NextColor为默认颜色，每次填充上面两层
             {
@@ -247,7 +265,6 @@ namespace JY.Toon.Bartending
                 (float value) =>
                 {
                     layerLerps[currentLayer] = value;
-                    Debug.Log(layerLerps[currentLayer]);
                     shaderNeedUpdate = true;
                 },
                 lerpCurve
@@ -291,7 +308,7 @@ namespace JY.Toon.Bartending
             UpdateShaderProperties();
             Debug.Log("已重置酒杯");
         }
-
+#endregion
         /// <summary>
         /// 设置UI
         /// </summary>
