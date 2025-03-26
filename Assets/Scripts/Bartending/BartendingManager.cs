@@ -28,6 +28,8 @@ namespace JY.Toon.Bartending
         [SerializeField] private AnimationCurve heightCurve;
         [SerializeField] private AnimationCurve warpCurve;
         [SerializeField] private AnimationCurve lerpCurve;
+        [Header("Ice")]
+        [SerializeField] private Mesh iceMesh;
         
         [Header("UI")]
         [SerializeField] private Button pourButton; 
@@ -75,14 +77,7 @@ namespace JY.Toon.Bartending
 
             ResetMaskTexArray(maxLayers);
 
-            if (liquidRenderer != null)
-            {
-                liquidMaterial = liquidRenderer.material;
-            }
-            else
-            {
-                Debug.LogError("<BartendingManager> liquidRenderer未指定");
-            }
+            liquidMaterial = liquidRenderer.sharedMaterial;
             
             // 初始化shader参数
             InitializeShaderProperties();
@@ -100,24 +95,34 @@ namespace JY.Toon.Bartending
             }
         }
 #region RenderFeature
-       // 单独渲染背景和液体
+        // 自定义渲染顺序
         private LiquidPass liquidPass;
         private void OnEnable()
         {
-            liquidPass = new LiquidPass();
-            liquidPass.renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
-            RenderPipelineManager.beginCameraRendering += OnBeginCamera;
+            if (liquidRenderer != null && iceMesh != null)
+            {
+                liquidPass = new LiquidPass(liquidRenderer, iceMesh);
+                liquidPass.renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
+                RenderPipelineManager.beginCameraRendering += OnBeginCamera;
+            }
+            else
+            {
+                Debug.LogError("<BartendingManager> liquidRenderer或iceMesh未指定");
+            }
         }
 
         private void OnDisable()
         {
             RenderPipelineManager.beginCameraRendering -= OnBeginCamera;
-            liquidPass.Cleanup();
+            liquidPass.Dispose();
         }
 
         private void OnBeginCamera(ScriptableRenderContext context, Camera cam)
         {
-            cam.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(liquidPass);
+            if (liquidPass != null && cam.cameraType == CameraType.Game)
+            {
+                cam.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(liquidPass);
+            }
         }
 #endregion
 #region MaskTexArray
