@@ -10,7 +10,6 @@ namespace JY.Toon.Bartending
         [SerializeField] private float buoyancyForceStrength = 200f; 
         [SerializeField] private float maxBuoyancyForce = 100f; 
         [SerializeField] private float centerToBottomOffset = 0f;
-        [SerializeField] private GameObject liquidObject;
         [SerializeField] private Vector3 drag = new(1f, 1f, 1f);
         [SerializeField] private float angularDrag = 1f;
         [SerializeField] private float buoyancyTorqueStrength = 1f;
@@ -23,23 +22,18 @@ namespace JY.Toon.Bartending
         private float waveAmplitude;
         private float waveFrequency;
         private float waveSpeed;
-
+        private Renderer liquidRenderer;
+        
         private void Start()
         {
             rigidBody = transform.GetComponent<Rigidbody>();
             maxLiquidHeight = BartendingManager.Instance.MaxLiquidHeight;
-            
             waveFrequency = BartendingManager.Instance.WaveFrequency;
             waveSpeed = BartendingManager.Instance.WaveSpeed;
             waveAmplitude = BartendingManager.Instance.WaveAmplitude;
-            if (liquidObject != null)
-            {
-                liquidObjectPosWS = liquidObject.transform.position;
-            }
-            else
-            {
-                Debug.LogError("漂浮物没有设置液体对象!");
-            }
+            liquidRenderer = BartendingManager.Instance.LiquidRenderer;
+
+            liquidObjectPosWS = liquidRenderer.transform.position;
         }
 
         // 计算波浪 和shader中一致

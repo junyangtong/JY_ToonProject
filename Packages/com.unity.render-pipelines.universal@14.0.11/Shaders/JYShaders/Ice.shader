@@ -30,6 +30,8 @@ Shader "JY/Toon/Ice"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _SHADOWS_SOFT
+            // GPU Instancing
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -87,7 +89,7 @@ Shader "JY/Toon/Ice"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
                 // 采样基础纹理
-                half4 albedoAlpha = SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
+                half4 albedoAlpha = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
                 half3 albedo = albedoAlpha.rgb * _BaseColor.rgb;
                 half alpha = albedoAlpha.a * _BaseColor.a;
 
@@ -105,15 +107,7 @@ Shader "JY/Toon/Ice"
                 // 基础漫反射
                 half3 diffuse = albedo * mainLight.color * NdotL;
 
-                // 镜面反射
-                half roughness = 1 - _Smoothness;
-                half3 specular = mainLight.color * pow(NdotH, 1 / roughness) * _Metallic;
-
-                // 环境光
-                half3 ambient = SampleSH(normalWS) * albedo;
-
-                // 最终颜色
-                half3 finalColor = diffuse + specular + ambient;
+                half3 finalColor = diffuse;
 
                 return half4(finalColor, alpha);
             }

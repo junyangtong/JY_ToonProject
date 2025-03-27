@@ -181,7 +181,7 @@ Shader "JY/Toon/Liquid"
                 ZFail Replace // 确保在被其他物体遮挡时也能写入模板值
             }
             Cull Back
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend One Zero
             ZWrite On
             
             HLSLPROGRAM
@@ -266,7 +266,7 @@ Shader "JY/Toon/Liquid"
                 Pass Replace
             }
             Cull Front
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend One Zero
             ZWrite On
             
             HLSLPROGRAM

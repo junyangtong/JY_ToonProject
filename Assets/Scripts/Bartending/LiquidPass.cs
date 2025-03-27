@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using System.Collections.Generic;
 namespace JY.Toon.Bartending
 {
     public class LiquidPass : ScriptableRenderPass
@@ -10,6 +11,7 @@ namespace JY.Toon.Bartending
         private Material mergeMat;
         private Renderer liquidRenderer;
         private Mesh iceMesh;
+        private Material liquidMat;
         private Material iceMat;
         private Matrix4x4[] iceMatrix;
         public static readonly int id_SceneColorBuffer = Shader.PropertyToID("_SceneColorBuffer");
@@ -20,13 +22,26 @@ namespace JY.Toon.Bartending
         private static readonly ProfilingSampler profilingSampler_Ice = new("LiquidPass_Ice");
         private static readonly ProfilingSampler profilingSampler_Merge = new("LiquidPass_Merge");
 
-        public LiquidPass(Renderer liquidRenderer, Mesh iceMesh)
+        public LiquidPass(Renderer liquidRenderer, GameObject iceObj)
         {
             this.liquidRenderer = liquidRenderer;
-            this.iceMesh = iceMesh;
-            iceMat =  new Material(Shader.Find("JY/Toon/Ice"));
+            this.iceMesh = iceObj.GetComponent<MeshFilter>().sharedMesh;
+            liquidMat = liquidRenderer.sharedMaterial;
+            iceMat = iceObj.GetComponent<Renderer>().sharedMaterial;
             mergeMat = new Material(Shader.Find("JY/Toon/LiquidMerge"));
             renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
+        }
+
+        public void UpdateIceMatrix(List<Rigidbody> iceRigid)
+        {
+            if (iceRigid != null)
+            {
+                iceMatrix = new Matrix4x4[iceRigid.Count];
+                for (int i = 0; i < iceRigid.Count; i++)
+                {
+                    iceMatrix[i] = iceRigid[i].transform.localToWorldMatrix;
+                }
+            }
         }
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
@@ -66,8 +81,8 @@ namespace JY.Toon.Bartending
             // Pass2 液体
             using (new ProfilingScope(cmd, profilingSampler_Liquid))
             {
-                CoreUtils.SetRenderTarget(cmd, handle_SceneColor, handle_SceneDepth, ClearFlag.None);
-                cmd.DrawRenderer(liquidRenderer, liquidRenderer.sharedMaterial, 0, -1);
+                CoreUtils.SetRenderTarget(cmd, handle_SceneColor, handle_SceneDepth, ClearFlag.Stencil);
+                cmd.DrawRenderer(liquidRenderer, liquidMat, 0, -1);
             }
             // Pass3 冰块 gpuinstance
             using (new ProfilingScope(cmd, profilingSampler_Ice))

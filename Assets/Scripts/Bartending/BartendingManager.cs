@@ -29,11 +29,14 @@ namespace JY.Toon.Bartending
         [SerializeField] private AnimationCurve warpCurve;
         [SerializeField] private AnimationCurve lerpCurve;
         [Header("Ice")]
-        [SerializeField] private Mesh iceMesh;
+        [SerializeField] private IceCount iceCount = IceCount.less;
+        [SerializeField] private GameObject iceObj;
+        [SerializeField] private float iceInitialHeight = 2.0f;
         
         [Header("UI")]
         [SerializeField] private Button pourButton; 
         [SerializeField] private Button resetButton; 
+        [SerializeField] private Button addIceButton; 
         
         private int maxLayers = 0;
         private Material liquidMaterial;
@@ -44,13 +47,25 @@ namespace JY.Toon.Bartending
         private bool shaderNeedUpdate = false;
         private RenderTexture layerMaskTexArray;
         private const int maskSize = 256;
+        private LiquidPass liquidPass;
+        private List<Rigidbody> iceRigid;
+        private List<GameObject> iceObjPool;
+        private int iceCountMax = 8;
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
         public float WaveAmplitude => waveAmplitude;
         public float WaveFrequency => waveFrequency;
         public float WaveSpeed => waveSpeed;
+        public Renderer LiquidRenderer => liquidRenderer;
 
+        enum IceCount
+        {
+            None = 0,
+            less = 3,
+            medium = 5,
+            more = 8
+        }
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -94,20 +109,66 @@ namespace JY.Toon.Bartending
                 shaderNeedUpdate = false;
             }
         }
+
+#region Ice
+        public void AddIce()
+        {
+            // 每次添加都初始化
+            iceRigid = new List<Rigidbody>();// 重置list
+            // 重置冰块对象池
+            foreach (GameObject ice in iceObjPool)
+            {
+                ice.SetActive(false);
+            }
+
+            if ((int)iceCount == 0)
+            {
+                return;
+            }
+
+            if (iceObj == null)
+            {
+                Debug.LogError("<BartendingManager> iceObj未指定");
+                return;
+            }
+            
+            // 冰块生成位置
+            Vector3 initalPosition = liquidRenderer.transform.position + Vector3.up * iceInitialHeight;
+            for (int i = 0; i < (int)iceCount; i++)
+            {
+                iceObjPool[i].SetActive(true);
+                iceObjPool[i].transform.position = initalPosition;
+                iceObjPool[i].GetComponent<Renderer>().enabled = false;
+                iceRigid.Add(iceObjPool[i].GetComponent<Rigidbody>());
+            }
+        }
+#endregion
+
 #region RenderFeature
         // 自定义渲染顺序
-        private LiquidPass liquidPass;
         private void OnEnable()
         {
-            if (liquidRenderer != null && iceMesh != null)
+            //初始化冰块对象池 对象池在每帧执行的情况下比destroy快了一倍但是应该没人手速这么快吧..
+            if (iceObjPool == null)
             {
-                liquidPass = new LiquidPass(liquidRenderer, iceMesh);
+                iceObjPool = new List<GameObject>(iceCountMax);
+                for (int i = 0; i < iceCountMax; i++)
+                {
+                    GameObject ice = Instantiate(iceObj, Vector3.zero, Quaternion.identity);
+                    ice.SetActive(false);
+                    iceObjPool.Add(ice);
+                }
+            }
+            // 初始化liquidPass
+            if (liquidRenderer != null && iceObj != null)
+            {
+                liquidPass = new LiquidPass(liquidRenderer, iceObj);
                 liquidPass.renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
                 RenderPipelineManager.beginCameraRendering += OnBeginCamera;
             }
             else
             {
-                Debug.LogError("<BartendingManager> liquidRenderer或iceMesh未指定");
+                Debug.LogError("<BartendingManager> liquidRenderer或iceObj未指定");
             }
         }
 
@@ -121,6 +182,7 @@ namespace JY.Toon.Bartending
         {
             if (liquidPass != null && cam.cameraType == CameraType.Game)
             {
+                liquidPass.UpdateIceMatrix(iceRigid);
                 cam.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(liquidPass);
             }
         }
@@ -212,13 +274,6 @@ namespace JY.Toon.Bartending
                 Debug.Log("正在倒入液体无法添加！");
                 return;
             }
-            // 更新mask2DArr
-            Texture2D newMask = liquidLayerData.GetLayerMaskTex(currentLayer);
-            Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
-            if (currentLayer < maxLayers - 1) // 使得液面能采到当前层的mask而不为空，每次填充上面两层
-            {
-                Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
-            }
 
             //更新数组
             if (currentLayer < maxLayers - 1) // 防止CurrentColor和NextColor做插值时NextColor为默认颜色，每次填充上面两层
@@ -231,6 +286,15 @@ namespace JY.Toon.Bartending
                 Color layerColor = liquidLayerData.GetLayerColor(currentLayer);
                 layerColors[currentLayer] = layerColor;
             }
+
+            // 更新mask2DArr
+            Texture2D newMask = liquidLayerData.GetLayerMaskTex(currentLayer);
+            Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
+            if (currentLayer < maxLayers - 1) // 和颜色一样 每次填充上面两层
+            {
+                Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
+            }
+            
             layerLerps[currentLayer] = liquidLayerData.GetLayerLerpRange(currentLayer);
             
             // 计算当前层高度和下一层高度
@@ -326,6 +390,10 @@ namespace JY.Toon.Bartending
             if (resetButton != null)
             {
                 resetButton.onClick.AddListener(ResetLiquid);
+            }
+            if (addIceButton != null)
+            {
+                addIceButton.onClick.AddListener(AddIce);
             }
         }
 
