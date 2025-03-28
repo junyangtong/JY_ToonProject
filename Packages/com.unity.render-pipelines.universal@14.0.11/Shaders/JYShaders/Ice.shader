@@ -2,10 +2,9 @@ Shader "JY/Toon/Ice"
 {
     Properties
     {
+        _MatCapTex ("MatCap Texture", 2D) = "white" {}
         _BaseColor ("Base Color", Color) = (1, 1, 1, 1)
-        _BaseMap ("Base Map", 2D) = "white" {}
-        _Smoothness ("Smoothness", Range(0.0, 1.0)) = 0.5
-        _Metallic ("Metallic", Range(0.0, 1.0)) = 0.0
+        _RefractIntensity ("Refract Intensity", Float) = 0.0
     }
 
     SubShader
@@ -15,9 +14,6 @@ Shader "JY/Toon/Ice"
             "RenderType" = "Opaque"
             "RenderPipeline" = "UniversalPipeline"
             "Queue" = "Geometry"
-            "IgnoreProjector" = "True"
-            "CastShadows" = "True"
-            "ReceiveShadows" = "True"
         }
 
         Pass
@@ -56,15 +52,16 @@ Shader "JY/Toon/Ice"
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            TEXTURE2D(_BaseMap);
-            SAMPLER(sampler_BaseMap);
+            TEXTURE2D(_MatCapTex);
+            SAMPLER(sampler_MatCapTex);
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseMap_ST;
+                half _RefractIntensity;
                 half4 _BaseColor;
-                half _Smoothness;
-                half _Metallic;
             CBUFFER_END
+
+            TEXTURE2D(_SceneColorBuffer);       SAMPLER(sampler_SceneColorBuffer);
+            TEXTURE2D(_SceneDepthBuffer);       SAMPLER(sampler_SceneDepthBuffer);
 
             Varyings vert(Attributes input)
             {
@@ -78,7 +75,7 @@ Shader "JY/Toon/Ice"
                 output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
                 output.tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
-                output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+                output.uv = input.uv;
 
                 return output;
             }
@@ -87,29 +84,21 @@ Shader "JY/Toon/Ice"
             {
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                
+                // 折射
+                float2 screenUV = input.positionCS.xy / _ScreenParams.xy;
+                float3 normalVS = mul((float3x3)UNITY_MATRIX_V, input.normalWS);
+                float2 distortion = normalVS.xy;
+                float2 refractionUV = screenUV + distortion * _RefractIntensity;
+                half3 refractionColor = _BaseColor.rgb * SAMPLE_TEXTURE2D(_SceneColorBuffer, sampler_SceneColorBuffer, refractionUV).rgb;
+                half3 albedo = refractionColor;
 
-                // 采样基础纹理
-                half4 albedoAlpha = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
-                half3 albedo = albedoAlpha.rgb * _BaseColor.rgb;
-                half alpha = albedoAlpha.a * _BaseColor.a;
+                // MatCap
+                float2 matcapUV = normalVS.xy * 0.5 + 0.5;
+                half4 matcapColor = SAMPLE_TEXTURE2D(_MatCapTex, sampler_MatCapTex, matcapUV);
+                half3 finalColor = albedo + matcapColor.rgb;
 
-                // 获取主光源
-                Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
-                half3 normalWS = normalize(input.normalWS);
-                half3 viewDirWS = normalize(GetWorldSpaceViewDir(input.positionWS));
-                half3 halfDirWS = normalize(mainLight.direction + viewDirWS);
-
-                // 计算光照
-                half NdotL = saturate(dot(normalWS, mainLight.direction));
-                half NdotH = saturate(dot(normalWS, halfDirWS));
-                half NdotV = saturate(dot(normalWS, viewDirWS));
-
-                // 基础漫反射
-                half3 diffuse = albedo * mainLight.color * NdotL;
-
-                half3 finalColor = diffuse;
-
-                return half4(finalColor, alpha);
+                return half4(finalColor, 1.0);
             }
             ENDHLSL
         }

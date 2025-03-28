@@ -41,8 +41,8 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     
     // 折射效果计算
     float2 screenUV = inputData.normalizedScreenSpaceUV;
-    float3 viewNormal = mul((float3x3)UNITY_MATRIX_V, inputData.normalWS);
-    float2 distortion = viewNormal.xy;
+    float3 normalVS = mul((float3x3)UNITY_MATRIX_V, inputData.normalWS);
+    float2 distortion = normalVS.xy;
 
     // 计算最终折射UV
     float2 refractionUV = screenUV + distortion * _RefractIntensity;

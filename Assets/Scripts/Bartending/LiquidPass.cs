@@ -22,6 +22,17 @@ namespace JY.Toon.Bartending
         private static readonly ProfilingSampler profilingSampler_Ice = new("LiquidPass_Ice");
         private static readonly ProfilingSampler profilingSampler_Merge = new("LiquidPass_Merge");
 
+        // 两张RT交替渲染 颜色和深度各两张
+        RTHandle SceneColorPing, SceneColorPong;
+        RTHandle SceneDepthPing, SceneDepthPong;
+        RTHandle SceneColorSource,SceneColorTarget;
+        RTHandle SceneDepthSource, SceneDepthTarget;
+
+        /* SceneColorSource = SceneColorPing;
+        SceneColorTarget = SceneColorPong;
+        SceneDepthSource = SceneDepthPing;
+        SceneDepthTarget = SceneDepthPong; */
+
         public LiquidPass(Renderer liquidRenderer, GameObject iceObj)
         {
             this.liquidRenderer = liquidRenderer;
@@ -84,6 +95,7 @@ namespace JY.Toon.Bartending
                 CoreUtils.SetRenderTarget(cmd, handle_SceneColor, handle_SceneDepth, ClearFlag.Stencil);
                 cmd.DrawRenderer(liquidRenderer, liquidMat, 0, -1);
             }
+            
             // Pass3 冰块 gpuinstance
             using (new ProfilingScope(cmd, profilingSampler_Ice))
             {
@@ -103,6 +115,21 @@ namespace JY.Toon.Bartending
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
             CommandBufferPool.Release(cmd);
+        }
+
+        // 交换RT
+        void SwapSceneColorTarget()
+        {
+            var temp = SceneColorSource;
+            SceneColorSource = SceneColorTarget;
+            SceneColorTarget = temp;
+        }
+        
+        void SwapSceneDepthTarget()
+        {
+            var temp = SceneDepthSource;
+            SceneDepthSource = SceneDepthTarget;
+            SceneDepthTarget = temp;
         }
 
         public void Dispose()
