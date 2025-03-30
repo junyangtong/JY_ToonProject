@@ -14,11 +14,16 @@ namespace JY.Toon.Bartending
         private static bool isAnimating = false;
 
         public static bool IsAnimating => isAnimating;
-        
+        public static float Remap(float input, float inputMin, float inputMax, float outputMin, float outputMax) 
+        {
+            float t = (input - inputMin) / (inputMax - inputMin);
+            return outputMin + t * (outputMax - outputMin);
+        }
+
         /// <summary>
         /// 高度过渡动画
         /// <summary>
-        public static async UniTask AnimateTwoFloatAsync(float startValue, float targetValue, float duration, Action<float> callback, AnimationCurve curve = null)
+        public static async UniTask AnimateTwoValueAsync(float startValue, float targetValue, float duration, Action<float> callback, AnimationCurve curve = null)
         {
             isAnimating = true;
             float elapsedTime = 0f;
@@ -33,6 +38,7 @@ namespace JY.Toon.Bartending
                 if (curve != null)
                 {
                     smoothT = curve.Evaluate(t); // 使用动画曲线 
+                    smoothT = Remap(smoothT, 0f, duration, 0f, 1f);//0-1
                 }
                 else
                 {
@@ -52,6 +58,45 @@ namespace JY.Toon.Bartending
             callback.Invoke(targetValue);
             isAnimating = false;
         }
+        /// <summary>
+        /// 颜色过渡动画
+        /// <summary>
+        public static async UniTask AnimateTwoValueAsync(Color[] startValue, Color targetValue, float duration,float blendCount, Action<Color[]> callback, AnimationCurve curve = null)
+        {
+            isAnimating = true;
+            float elapsedTime = 0f;
+            Color[] currentValue = startValue;
+            
+            while (elapsedTime < duration)
+            {
+                float t = elapsedTime / duration;
+
+                float smoothT;
+                
+                if (curve != null)
+                {
+                    smoothT = curve.Evaluate(t); // 使用动画曲线 
+                }
+                else
+                {
+                    smoothT = Mathf.SmoothStep(0f, 1f, t);
+                }
+
+                for (int i = 0; i <= blendCount; i++)
+                {
+                    currentValue[i] = Color.Lerp(startValue[i], targetValue, smoothT);
+                }
+                
+                // 回调更新
+                callback.Invoke(currentValue);
+                
+                // 等待下一帧
+                await UniTask.Yield();
+                elapsedTime += Time.deltaTime;
+            }
+            isAnimating = false;
+        }
+    
 
         /// <summary>
         /// 波浪过渡动画
@@ -70,7 +115,7 @@ namespace JY.Toon.Bartending
                 
                 if (curve != null)
                 {
-                    smoothT = curve.Evaluate(t); // 使用动画曲线 
+                    smoothT = curve.Evaluate(t); // 使用动画曲线  
                 }
                 else
                 {

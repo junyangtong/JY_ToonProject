@@ -32,10 +32,14 @@ Shader "JY/Toon/LiquidMerge"
                 float2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
-            TEXTURE2D(_LiquidColorBuffer);       SAMPLER(sampler_LiquidColorBuffer);
-            TEXTURE2D(_LiquidDepthBuffer);       SAMPLER(sampler_LiquidDepthBuffer);
-            TEXTURE2D(_SceneColorBuffer);       SAMPLER(sampler_SceneColorBuffer);
-            TEXTURE2D(_SceneDepthBuffer);       SAMPLER(sampler_SceneDepthBuffer);
+            TEXTURE2D(_SceneColorBuffer);               SAMPLER(sampler_SceneColorBuffer);
+            TEXTURE2D(_SceneDepthBuffer);               SAMPLER(sampler_SceneDepthBuffer);
+            TEXTURE2D(_IceColorBuffer);                 SAMPLER(sampler_IceColorBuffer);
+            TEXTURE2D(_IceDepthBuffer);                 SAMPLER(sampler_IceDepthBuffer);
+            TEXTURE2D(_FrontLiquidColorBuffer);         SAMPLER(sampler_FrontLiquidColorBuffer);
+            TEXTURE2D(_FrontLiquidDepthBuffer);         SAMPLER(sampler_FrontLiquidDepthBuffer);
+            TEXTURE2D(_BackLiquidColorBuffer);          SAMPLER(sampler_BackLiquidColorBuffer);
+            TEXTURE2D(_BackLiquidDepthBuffer);          SAMPLER(sampler_BackLiquidDepthBuffer);
 
             CBUFFER_START(UnityPerMaterial)
                 float _WarpInt;
@@ -58,14 +62,28 @@ Shader "JY/Toon/LiquidMerge"
             half4 frag(Varyings input, out float depthOUT : SV_Depth) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-
-                // 采样场景颜色和深度
-                float4 sceneColor = SAMPLE_TEXTURE2D(_SceneColorBuffer, sampler_SceneColorBuffer, input.texcoord);
-                float sceneDepth = SAMPLE_TEXTURE2D(_SceneDepthBuffer, sampler_SceneDepthBuffer, input.texcoord);
                 
-                float4 finalColor = sceneColor;
-                depthOUT = sceneDepth;
-                return finalColor;
+                // 采样
+                float4 sceneColor = SAMPLE_TEXTURE2D(_SceneColorBuffer, sampler_SceneColorBuffer, input.texcoord);
+                float sceneDepth = SAMPLE_TEXTURE2D(_SceneDepthBuffer, sampler_SceneDepthBuffer, input.texcoord).r;
+                float4 iceColor = SAMPLE_TEXTURE2D(_IceColorBuffer, sampler_IceColorBuffer, input.texcoord);
+                float iceDepth = SAMPLE_TEXTURE2D(_IceDepthBuffer, sampler_IceDepthBuffer, input.texcoord).r;
+                float4 frontLiquidColor = SAMPLE_TEXTURE2D(_FrontLiquidColorBuffer, sampler_FrontLiquidColorBuffer, input.texcoord);
+                float frontLiquidDepth = SAMPLE_TEXTURE2D(_FrontLiquidDepthBuffer, sampler_FrontLiquidDepthBuffer, input.texcoord).r;
+                float4 backLiquidColor = SAMPLE_TEXTURE2D(_BackLiquidColorBuffer, sampler_BackLiquidColorBuffer, input.texcoord);   
+                float backLiquidDepth = SAMPLE_TEXTURE2D(_BackLiquidDepthBuffer, sampler_BackLiquidDepthBuffer, input.texcoord).r;
+
+                // 混合
+                backLiquidColor = lerp(backLiquidColor, 0.0, step(backLiquidDepth, sceneDepth));
+                half4 iceAndBackGround = lerp(sceneColor, iceColor, step(0.001, iceDepth));
+                half4 back = lerp(lerp(iceAndBackGround, backLiquidColor, backLiquidColor.a), iceAndBackGround, step(backLiquidDepth, iceDepth));
+
+                half4 frontIceAndBackGround = lerp(iceColor, lerp(sceneColor, frontLiquidColor, frontLiquidColor.a), frontLiquidColor.a);
+                half4 front = lerp(frontIceAndBackGround, back, step(frontLiquidDepth, sceneDepth));
+                
+                depthOUT = sceneDepth;//max(sceneDepth, iceDepth);
+                float4 finalColor = front;
+                return front;
             }
             ENDHLSL
         }

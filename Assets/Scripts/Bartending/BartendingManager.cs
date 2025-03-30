@@ -22,12 +22,15 @@ namespace JY.Toon.Bartending
         [SerializeField] private float waveAmplitude = 0.3f;
         [SerializeField] private float waveFrequency = 3.0f;
         [SerializeField] private float waveSpeed = 1.0f;
+        [SerializeField] private Color[] layerColors;
 
         [Header("Animation")]
         [SerializeField] private float liquidPourDuration = 1.0f;
+        [SerializeField] private float liquidBlendDuration = 1.0f;
         [SerializeField] private AnimationCurve heightCurve;
         [SerializeField] private AnimationCurve warpCurve;
         [SerializeField] private AnimationCurve lerpCurve;
+        [SerializeField] private AnimationCurve blendCurve;
         [Header("Ice")]
         [SerializeField] private IceCount iceCount = IceCount.less;
         [SerializeField] private GameObject iceObj;
@@ -37,10 +40,10 @@ namespace JY.Toon.Bartending
         [SerializeField] private Button pourButton; 
         [SerializeField] private Button resetButton; 
         [SerializeField] private Button addIceButton; 
+        [SerializeField] private Button blendButton; 
         
         private int maxLayers = 0;
         private Material liquidMaterial;
-        private Color[] layerColors;
         private float[] layerLerps;
         private float liquidHeight01 = 0f;
         private int currentLayer = 0;
@@ -51,6 +54,7 @@ namespace JY.Toon.Bartending
         private List<Rigidbody> iceRigid;
         private List<GameObject> iceObjPool;
         private int iceCountMax = 8;
+        private float[] bubbleInt;
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -89,6 +93,7 @@ namespace JY.Toon.Bartending
             }
             layerColors = new Color[maxLayers];
             layerLerps = new float[maxLayers];
+            bubbleInt = new float[maxLayers];
 
             ResetMaskTexArray(maxLayers);
 
@@ -236,6 +241,7 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_MaxLiquidHeight", maxLiquidHeight);
                 liquidMaterial.SetColorArray("_LiquidLayerColor", layerColors);
                 liquidMaterial.SetFloatArray("_LiquidLayerLerpRange", layerLerps);
+                liquidMaterial.SetFloatArray("_BubbleInt", bubbleInt);
                 liquidMaterial.SetFloat("_WaveAmplitude", 0f);
                 liquidMaterial.SetFloat("_WaveFrequency", 1f);
                 liquidMaterial.SetFloat("_WaveSpeed", 1f);
@@ -252,6 +258,7 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_LiquidHeight01", liquidHeight01);
                 liquidMaterial.SetColorArray("_LiquidLayerColor", layerColors);
                 liquidMaterial.SetFloatArray("_LiquidLayerLerpRange", layerLerps);
+                liquidMaterial.SetFloatArray("_BubbleInt", bubbleInt);
                 liquidMaterial.SetTexture("_LiquidLayerMaskTex", layerMaskTexArray);
                 liquidMaterial.SetFloat("_WaveAmplitude", waveAmplitude);
                 liquidMaterial.SetFloat("_WaveFrequency", waveFrequency);
@@ -271,7 +278,7 @@ namespace JY.Toon.Bartending
             }
             if (BartendingAnimation.IsAnimating)
             {
-                Debug.Log("正在倒入液体无法添加！");
+                Debug.Log("正在播放动画，无法添加！");
                 return;
             }
 
@@ -296,14 +303,15 @@ namespace JY.Toon.Bartending
             }
             
             layerLerps[currentLayer] = liquidLayerData.GetLayerLerpRange(currentLayer);
-            
+            bubbleInt[currentLayer] = liquidLayerData.GetLayerBubbleInt(currentLayer);
+
             // 计算当前层高度和下一层高度
             float currentHeight = (float)currentLayer / maxLayers;
             float nextHeight = (float)(currentLayer + 1) / maxLayers;
             
             // 执行异步动画
             // 高度动画
-            UniTask heightTask = BartendingAnimation.AnimateTwoFloatAsync(
+            UniTask heightTask = BartendingAnimation.AnimateTwoValueAsync(
                 currentHeight, 
                 nextHeight, 
                 liquidPourDuration, 
@@ -327,7 +335,7 @@ namespace JY.Toon.Bartending
             );
 
             // 渐变动画
-            UniTask lerpTask = BartendingAnimation.AnimateTwoFloatAsync(
+            UniTask lerpTask = BartendingAnimation.AnimateTwoValueAsync(
                 0, 
                 layerLerps[currentLayer], 
                 liquidPourDuration, 
@@ -346,6 +354,53 @@ namespace JY.Toon.Bartending
             currentLayer++;
             Debug.Log($"倒入第 {currentLayer} 层液体");
         }
+        /// <summary>
+        /// 搅拌
+        /// </summary>
+        public async void Blend()
+        {
+            if (currentLayer <= 1)
+            {
+                Debug.Log("少于两层液体无法搅拌！");
+                return;
+            }
+             if (BartendingAnimation.IsAnimating)
+            {
+                Debug.Log("正在播放动画，无法搅拌！");
+                return;
+            }
+            //混合颜色
+            /* 搅拌时计算当前已有的所有颜色的混合颜色值作为目标颜色
+            当前已有的颜色值全部向目标颜色过渡 */
+            int blendCount = currentLayer - 1;// 需要混合的层数
+            Color averageColor = Color.clear;
+            for (int i = 0; i <= blendCount; i++)
+            {
+                averageColor += layerColors[i];
+            }
+            averageColor /= blendCount + 1;
+            
+            // 颜色渐变动画
+            int count = blendCount == 4 ? blendCount : blendCount+1; // 要改变上面两层颜色
+            UniTask blendColTask = BartendingAnimation.AnimateTwoValueAsync(
+                layerColors, 
+                averageColor, 
+                liquidBlendDuration,
+                count,
+                (Color[] value) =>
+                {
+                    layerColors = value;
+                    shaderNeedUpdate = true;
+                },
+                blendCurve
+            );
+
+            //混合Mask
+
+            
+            // 等待所有异步动画完成
+            await UniTask.WhenAll(blendColTask);
+        }
 
         /// <summary>
         /// 重置液体
@@ -361,7 +416,7 @@ namespace JY.Toon.Bartending
             // 清空动画
             if (liquidHeight01 > 0)
             {
-                await BartendingAnimation.AnimateTwoFloatAsync(
+                await BartendingAnimation.AnimateTwoValueAsync(
                     liquidHeight01, 
                     0f, 
                     liquidPourDuration, 
@@ -394,6 +449,10 @@ namespace JY.Toon.Bartending
             if (addIceButton != null)
             {
                 addIceButton.onClick.AddListener(AddIce);
+            }
+            if (blendButton != null)
+            {
+                blendButton.onClick.AddListener(Blend);
             }
         }
 

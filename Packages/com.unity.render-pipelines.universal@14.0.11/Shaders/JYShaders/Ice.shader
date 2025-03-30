@@ -5,6 +5,7 @@ Shader "JY/Toon/Ice"
         _MatCapTex ("MatCap Texture", 2D) = "white" {}
         _BaseColor ("Base Color", Color) = (1, 1, 1, 1)
         _RefractIntensity ("Refract Intensity", Float) = 0.0
+        _NormalTex ("_NormalTex", 2D) = "bump"
     }
 
     SubShader
@@ -19,7 +20,9 @@ Shader "JY/Toon/Ice"
         Pass
         {
             Name "ForwardLit"
-
+/*             ZTest Off
+            ZWrite On
+            Blend SrcAlpha OneMinusSrcAlpha */
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -47,21 +50,20 @@ Shader "JY/Toon/Ice"
                 float2 uv : TEXCOORD0;
                 float3 positionWS : TEXCOORD1;
                 float3 normalWS : TEXCOORD2;
-                float4 tangentWS : TEXCOORD3;
+                float3 tangentWS : TEXCOORD3;
+                float3x3 tangentToWorld : TEXCOORD4;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
-
-            TEXTURE2D(_MatCapTex);
-            SAMPLER(sampler_MatCapTex);
-
+            
             CBUFFER_START(UnityPerMaterial)
                 half _RefractIntensity;
                 half4 _BaseColor;
             CBUFFER_END
 
-            TEXTURE2D(_SceneColorBuffer);       SAMPLER(sampler_SceneColorBuffer);
-            TEXTURE2D(_SceneDepthBuffer);       SAMPLER(sampler_SceneDepthBuffer);
+            TEXTURE2D(_MatCapTex); SAMPLER(sampler_MatCapTex);
+            TEXTURE2D(_NormalTex); SAMPLER(sampler_NormalTex);
+            TEXTURE2D(_BackLiquidColorBuffer);       SAMPLER(sampler_BackLiquidColorBuffer);
 
             Varyings vert(Attributes input)
             {
@@ -71,10 +73,15 @@ Shader "JY/Toon/Ice"
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-                output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
-                output.normalWS = TransformObjectToWorldNormal(input.normalOS);
-                output.tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
+                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
+                VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
+
+                output.positionWS = vertexInput.positionWS;
+                output.positionCS = vertexInput.positionCS;
+                output.normalWS = normalInput.normalWS;
+                output.tangentWS = normalInput.tangentWS;
+                real sign = input.tangentOS.w * GetOddNegativeScale();
+                output.tangentToWorld = CreateTangentToWorld(normalInput.normalWS, normalInput.tangentWS, sign);
                 output.uv = input.uv;
 
                 return output;
@@ -85,14 +92,18 @@ Shader "JY/Toon/Ice"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 
+                // 法线
+                half3 normalTS = SAMPLE_TEXTURE2D(_NormalTex, sampler_NormalTex, input.uv).rgb;
+                float3 normalWS = mul(normalTS, input.tangentToWorld);
+
                 // 折射
                 float2 screenUV = input.positionCS.xy / _ScreenParams.xy;
-                float3 normalVS = mul((float3x3)UNITY_MATRIX_V, input.normalWS);
+                float3 normalVS = mul((float3x3)UNITY_MATRIX_V, normalWS);
                 float2 distortion = normalVS.xy;
                 float2 refractionUV = screenUV + distortion * _RefractIntensity;
-                half3 refractionColor = _BaseColor.rgb * SAMPLE_TEXTURE2D(_SceneColorBuffer, sampler_SceneColorBuffer, refractionUV).rgb;
+                half3 refractionColor = _BaseColor.rgb * SAMPLE_TEXTURE2D(_BackLiquidColorBuffer, sampler_BackLiquidColorBuffer, refractionUV).rgb;
                 half3 albedo = refractionColor;
-
+                
                 // MatCap
                 float2 matcapUV = normalVS.xy * 0.5 + 0.5;
                 half4 matcapColor = SAMPLE_TEXTURE2D(_MatCapTex, sampler_MatCapTex, matcapUV);

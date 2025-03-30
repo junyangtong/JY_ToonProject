@@ -10,9 +10,11 @@ public class LiquidLayerData : ScriptableObject
     {
         public string layerName;     // 液体层名称
         public Color color;          // 液体颜色
-        public Texture2D maskTex;    // TODO：为每层增加不同的mask纹理
+        public Texture2D maskTex;    // mask纹理
         [Range(0f, 1f)]
         public float lerpRange = 0.15f; // 渐变程度
+        [Range(0f, 1f)]
+        public float bubbleInt = 0f; // 气泡强度
     }
 
     // 液体层列表
@@ -50,4 +52,12 @@ public class LiquidLayerData : ScriptableObject
         return 0.15f;
     }
 
+    public float GetLayerBubbleInt(int index)
+    {
+        if (index >= 0 && index < liquidLayers.Count)
+        {
+            return liquidLayers[index].bubbleInt;
+        }
+        return 0f;
+    }
 } 
