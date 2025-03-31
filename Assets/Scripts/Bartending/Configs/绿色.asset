@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94f4534d713902748a1458794ef198ff, type: 3}
+  m_Name: "\u7EFF\u8272"
+  m_EditorClassIdentifier: 
+  data:
+    layerName: "\u7EFF\u8272"
+    color: {r: 0.27058822, g: 0.8, b: 0.2711205, a: 0.6039216}
+    maskTex: {fileID: 2800000, guid: a2cf25c4482d2484badc71691e268161, type: 3}
+    lerpRange: 0.257
+    bubbleInt: 1

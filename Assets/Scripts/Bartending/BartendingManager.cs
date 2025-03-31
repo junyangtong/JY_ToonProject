@@ -13,7 +13,7 @@ namespace JY.Toon.Bartending
         public static BartendingManager Instance { get; private set; }
 
         [Header("LiquidLayerData")]
-        [SerializeField] private LiquidLayerData liquidLayerData;
+        [SerializeField] private List<LiquidLayerData> liquidLayerDataList;
         
         [Header("Liquid Setting")]
         [SerializeField] private Renderer liquidRenderer;
@@ -41,8 +41,10 @@ namespace JY.Toon.Bartending
         [SerializeField] private Button resetButton; 
         [SerializeField] private Button addIceButton; 
         [SerializeField] private Button blendButton; 
+        [SerializeField] private Dropdown liquidLayerDropdown; 
         
-        private int maxLayers = 0;
+        private LiquidLayerData liquidLayerData;
+        private int maxLayers = 5;
         private Material liquidMaterial;
         private float[] layerLerps;
         private float liquidHeight01 = 0f;
@@ -83,14 +85,6 @@ namespace JY.Toon.Bartending
 
         void Start()
         {
-            if (liquidLayerData != null)
-            {
-                maxLayers = liquidLayerData.GetLayerCount();
-            }
-            else
-            {
-                Debug.LogError("<BartendingManager> liquidLayerData未指定");
-            }
             layerColors = new Color[maxLayers];
             layerLerps = new float[maxLayers];
             bubbleInt = new float[maxLayers];
@@ -285,25 +279,25 @@ namespace JY.Toon.Bartending
             //更新数组
             if (currentLayer < maxLayers - 1) // 防止CurrentColor和NextColor做插值时NextColor为默认颜色，每次填充上面两层
             {
-                Color layerColor = liquidLayerData.GetLayerColor(currentLayer);
+                Color layerColor = liquidLayerData.data.color;
                 layerColors[currentLayer] = layerColors[currentLayer+1] = layerColor;
             }
             else
             {
-                Color layerColor = liquidLayerData.GetLayerColor(currentLayer);
+                Color layerColor = liquidLayerData.data.color;
                 layerColors[currentLayer] = layerColor;
             }
 
             // 更新mask2DArr
-            Texture2D newMask = liquidLayerData.GetLayerMaskTex(currentLayer);
+            Texture2D newMask = liquidLayerData.data.maskTex;
             Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
             if (currentLayer < maxLayers - 1) // 和颜色一样 每次填充上面两层
             {
                 Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
             }
             
-            layerLerps[currentLayer] = liquidLayerData.GetLayerLerpRange(currentLayer);
-            bubbleInt[currentLayer] = liquidLayerData.GetLayerBubbleInt(currentLayer);
+            layerLerps[currentLayer] = liquidLayerData.data.lerpRange;
+            bubbleInt[currentLayer] = liquidLayerData.data.bubbleInt;
 
             // 计算当前层高度和下一层高度
             float currentHeight = (float)currentLayer / maxLayers;
@@ -433,6 +427,8 @@ namespace JY.Toon.Bartending
             Debug.Log("已重置酒杯");
         }
 #endregion
+
+#region UI
         /// <summary>
         /// 设置UI
         /// </summary>
@@ -454,7 +450,26 @@ namespace JY.Toon.Bartending
             {
                 blendButton.onClick.AddListener(Blend);
             }
+            if (liquidLayerDropdown != null)
+            {
+                // 生成Dropdown选项
+                liquidLayerDropdown.ClearOptions();
+                var options = new List<string>();
+                foreach (var liquid in liquidLayerDataList) {
+                    options.Add(liquid.data.layerName);
+                }
+                liquidLayerDropdown.AddOptions(options);
+                liquidLayerData = liquidLayerDataList[0];
+                liquidLayerDropdown.onValueChanged.AddListener(SetLiquidLayerData);
+            }
         }
+        
+        private void SetLiquidLayerData(int index)
+        {
+            if (index < 0 || index >= liquidLayerDataList.Count) return;
+            liquidLayerData = liquidLayerDataList[index];
+        }
+#endregion
 
         private void OnGUI()
         {

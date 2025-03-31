@@ -175,10 +175,10 @@ Material:
     - _GlossinessSource: 0
     - _GlossyReflections: 1
     - _HeightWarpInt: 0.19
-    - _LayerWarpInt: 0.5
+    - _LayerWarpInt: 0.388
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.4
+    - _LiquidHeight01: 0.8
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
@@ -207,7 +207,7 @@ Material:
     - _Transparent: 1
     - _UVSec: 0
     - _WaterLineWidth: 0.08
-    - _WaveAmplitude: 0.0042700768
+    - _WaveAmplitude: 0.00066781044
     - _WaveFrequency: 7.14
     - _WaveInt: 0.23
     - _WaveSpeed: 5
