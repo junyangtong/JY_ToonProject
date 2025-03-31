@@ -23,15 +23,17 @@ namespace JY.Toon.Bartending
         private float waveFrequency;
         private float waveSpeed;
         private Renderer liquidRenderer;
+        private BartendingManager bartendingManager;
         
         private void Start()
         {
             rigidBody = transform.GetComponent<Rigidbody>();
-            maxLiquidHeight = BartendingManager.Instance.MaxLiquidHeight;
-            waveFrequency = BartendingManager.Instance.WaveFrequency;
-            waveSpeed = BartendingManager.Instance.WaveSpeed;
-            waveAmplitude = BartendingManager.Instance.WaveAmplitude;
-            liquidRenderer = BartendingManager.Instance.LiquidRenderer;
+            bartendingManager = BartendingManager.Instance;
+            maxLiquidHeight = bartendingManager.MaxLiquidHeight;
+            waveFrequency = bartendingManager.WaveFrequency;
+            waveSpeed = bartendingManager.WaveSpeed;
+            waveAmplitude = bartendingManager.WaveAmplitude;
+            liquidRenderer = bartendingManager.LiquidRenderer;
 
             liquidObjectPosWS = liquidRenderer.transform.position;
         }
@@ -80,11 +82,11 @@ namespace JY.Toon.Bartending
             Vector3 relativePosition = transform.position - liquidObjectPosWS;
 
             // 计算波浪
-            waveAmplitude = BartendingManager.Instance.WaveAmplitude;
+            waveAmplitude = bartendingManager.WaveAmplitude;
             WaveInfo waveInfo = CalculateWave(relativePosition);
 
             // 当前液面相对高度
-            liquidHeight01 = BartendingManager.Instance.LiquidHeight01;
+            liquidHeight01 = bartendingManager.LiquidHeight01;
             liquidHeight = liquidHeight01 * maxLiquidHeight + waveInfo.height;
 
             // F浮=液体的密度×体积×重力加速度

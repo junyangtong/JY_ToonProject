@@ -85,15 +85,6 @@ namespace JY.Toon.Bartending
                     tempCamColorHandle.rtHandleProperties.rtHandleScale.y
                 ) : Vector2.one;
 
-            /* // Pass1 copy场景
-            using (new ProfilingScope(cmd, profilingSampler_Scene))
-            {
-                CoreUtils.SetRenderTarget(cmd, handle_SceneColor, handle_SceneDepth, ClearFlag.None);
-                Blitter.BlitColorAndDepth(cmd, sRdr_Camera.cameraColorTargetHandle, sRdr_Camera.cameraDepthTargetHandle, 
-                    viewportScale, 0, true);
-            }
-            mergeMat.SetTexture(id_SceneColorBuffer, handle_SceneColor);
-            mergeMat.SetTexture(id_SceneDepthBuffer, handle_SceneDepth); */
             // Pass1 copy场景
             using (new ProfilingScope(cmd, profilingSampler_Scene))
             {
@@ -126,15 +117,7 @@ namespace JY.Toon.Bartending
             }
             mergeMat.SetTexture(id_IceColorBuffer, handle_IceColor);
             mergeMat.SetTexture(id_IceDepthBuffer, handle_IceDepth);
-            /* // Pass3 copy场景
-            using (new ProfilingScope(cmd, profilingSampler_Scene))
-            {
-                CoreUtils.SetRenderTarget(cmd, handle_SceneColor, handle_SceneDepth, ClearFlag.None);
-                Blitter.BlitColorAndDepth(cmd, sRdr_Camera.cameraColorTargetHandle, sRdr_Camera.cameraDepthTargetHandle, 
-                    viewportScale, 0, true);
-            }
-            liquidMat.SetTexture(id_SceneColorBuffer, handle_SceneColor);
-            liquidMat.SetTexture(id_SceneDepthBuffer, handle_SceneDepth); */
+
             // Pass4 液体Front
             using (new ProfilingScope(cmd, profilingSampler_Liquid))
             {

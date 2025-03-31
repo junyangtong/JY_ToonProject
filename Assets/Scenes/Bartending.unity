@@ -2461,6 +2461,7 @@ MonoBehaviour:
   waveFrequency: 7.14
   waveSpeed: 5
   layerColors: []
+  maskBlendCS: {fileID: 7200000, guid: ce59efa851f20ca4cae656d4f44add82, type: 3}
   liquidPourDuration: 1
   liquidBlendDuration: 3
   heightCurve:
@@ -2601,6 +2602,12 @@ MonoBehaviour:
       weightedMode: 0
       inWeight: 0.05709356
       outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  bubbleCurve:
+    serializedVersion: 2
+    m_Curve: []
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
