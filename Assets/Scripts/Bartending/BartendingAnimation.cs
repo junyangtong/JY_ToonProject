@@ -98,8 +98,10 @@ namespace JY.Toon.Bartending
                     1
                 );
                 
+                RenderTexture copyMaskTexArray = BartendingManager.Instance.CopyMaskTexArray();
+
                 maskBlendCS.SetTexture(k_LerpMask, "_OutMaskTex2DArr", layerMaskTexArray);
-                maskBlendCS.SetTexture(k_LerpMask, "_SrcMaskTex2DArr", layerMaskTexArray);
+                maskBlendCS.SetTexture(k_LerpMask, "_SrcMaskTex2DArr", copyMaskTexArray);
                 maskBlendCS.SetTexture(k_LerpMask, "_DstMaskTex2D", averageMask);
                 maskBlendCS.SetFloat("_Lerp01", time);
                 maskBlendCS.Dispatch(k_LerpMask, gSize.x, gSize.y, gSize.z);

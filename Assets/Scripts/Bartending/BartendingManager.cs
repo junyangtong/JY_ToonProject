@@ -405,7 +405,7 @@ namespace JY.Toon.Bartending
                 }
             );
             // 混合mask
-            UniTask blendMaskTask =  BartendingAnimation.MaskAnimationAsync(
+            UniTask blendMaskTask = BartendingAnimation.MaskAnimationAsync(
                 liquidBlendDuration, 
                 layerMaskTexArray, 
                 (RenderTexture mask) => {
@@ -433,11 +433,12 @@ namespace JY.Toon.Bartending
             // 清空动画
             if (liquidHeight01 > 0)
             {
+                float targetHeight = liquidHeight01;
                 await BartendingAnimation.AnimationTimerAsync(
                     liquidPourDuration, 
                     (float time) =>
                     {
-                        liquidHeight01 = Mathf.Lerp(liquidHeight01, 0, heightCurve.Evaluate(time));
+                        liquidHeight01 = Mathf.Lerp(targetHeight, 0, heightCurve.Evaluate(time));
                         UpdateShaderProperties();
                     }
                 );

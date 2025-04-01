@@ -101,9 +101,9 @@ Shader "JY/Toon/Liquid"
         }
 
         // 视差映射
-        float2 ParallaxMappingUV(float2 uv, float3 viewDirTS)
+        float2 ParallaxMappingUV(float2 uv, float3 viewDirTS, float parallax)
         {
-            float2 p = viewDirTS.xy / (viewDirTS.z + 0.0001) * _BubbleParallax;
+            float2 p = viewDirTS.xy / (viewDirTS.z + 0.0001) * parallax;
             return uv - p;
         }
 
@@ -208,12 +208,6 @@ Shader "JY/Toon/Liquid"
                 half layerWarpMask = 1.0 - abs(lerp01 - 0.5) * 2.0;
                 
                 // 遮罩
-                half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
-                half bubbleMaskStep = step(0.99, bubbleMask);// 区分是否是气泡饮料 如果是气泡饮料mask向上移动
-                if(bubbleMaskStep > 0)
-                {
-                    input.uv.y += _Time.x * _BubbleSpeed;
-                }
                 half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, currentID)).r;
                 half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, nextID)).r;
                 half maskMixed = lerp(mask0, mask1, lerp01);
@@ -226,9 +220,12 @@ Shader "JY/Toon/Liquid"
                 half rimMask = _RimInt;
                 // 气泡
                 float2 bubbleUV = input.uv;
+                bubbleUV = ParallaxMappingUV(input.uv, input.viewDirTS, _BubbleParallax);
                 bubbleUV.y += _Time.x * _BubbleSpeed;
-                bubbleUV = ParallaxMappingUV(input.uv, input.viewDirTS);
-                bubbleMask *= SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
+                half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
+                half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
+                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, ParallaxMappingUV(input.uv, input.viewDirTS, _BubbleParallax + 0.1)).r;
+                bubbleMask *= (outBubble + innerBubble);
 
                 half3 finalColor = colorMixed.rgb + maskMixed.rrr + bubbleMask;
                 // 吃水线
