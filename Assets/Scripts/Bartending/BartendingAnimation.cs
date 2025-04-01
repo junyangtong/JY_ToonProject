@@ -85,26 +85,30 @@ namespace JY.Toon.Bartending
         /// </summary>
         public static async UniTask MaskAnimationAsync(float duration, RenderTexture layerMaskTexArray, Action<RenderTexture> callback)
         {
-            AnimationTimerAsync(
-                duration, 
-                (time) =>
-                {
-                    uint tSize_X, tSize_Y, tSize_Z;
-                    maskBlendCS.GetKernelThreadGroupSizes(k_LerpMask, out tSize_X, out tSize_Y, out tSize_Z);
-                    Vector3Int gSize = new Vector3Int(
-                        Mathf.CeilToInt(averageMask.width / (float) tSize_X),
-                        Mathf.CeilToInt(averageMask.height / (float) tSize_Y),
-                        1
-                    );
-                    
-                    maskBlendCS.SetTexture(k_LerpMask, "_OutMaskTex2DArr", layerMaskTexArray);
-                    maskBlendCS.SetTexture(k_LerpMask, "_SrcMaskTex2DArr", layerMaskTexArray);
-                    maskBlendCS.SetTexture(k_LerpMask, "_DstMaskTex2D", averageMask);
-                    maskBlendCS.SetFloat("_Lerp01", time);
-                    maskBlendCS.Dispatch(k_LerpMask, gSize.x, gSize.y, gSize.z);
-                    callback.Invoke(layerMaskTexArray);
-                }
-            );
+            isAnimating = true;
+            float elapsedTime = 0f;
+            while (elapsedTime < duration)
+            {
+                float time = elapsedTime / duration;
+                uint tSize_X, tSize_Y, tSize_Z;
+                maskBlendCS.GetKernelThreadGroupSizes(k_LerpMask, out tSize_X, out tSize_Y, out tSize_Z);
+                Vector3Int gSize = new Vector3Int(
+                    Mathf.CeilToInt(averageMask.width / (float) tSize_X),
+                    Mathf.CeilToInt(averageMask.height / (float) tSize_Y),
+                    1
+                );
+                
+                maskBlendCS.SetTexture(k_LerpMask, "_OutMaskTex2DArr", layerMaskTexArray);
+                maskBlendCS.SetTexture(k_LerpMask, "_SrcMaskTex2DArr", layerMaskTexArray);
+                maskBlendCS.SetTexture(k_LerpMask, "_DstMaskTex2D", averageMask);
+                maskBlendCS.SetFloat("_Lerp01", time);
+                maskBlendCS.Dispatch(k_LerpMask, gSize.x, gSize.y, gSize.z);
+                callback.Invoke(layerMaskTexArray);
+                await UniTask.Yield();
+                elapsedTime += Time.deltaTime;
+            }
+            
+            isAnimating = false;
         }
     }
 }

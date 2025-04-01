@@ -23,6 +23,8 @@ namespace JY.Toon.Bartending
         [SerializeField] private float waveFrequency = 3.0f;
         [SerializeField] private float waveSpeed = 1.0f;
         [SerializeField] private Color[] layerColors;
+        [SerializeField] private float[] layerLerps;
+        [SerializeField] private float[] bubbleInt;
         [SerializeField] private ComputeShader maskBlendCS;
 
         [Header("Animation")]
@@ -49,7 +51,6 @@ namespace JY.Toon.Bartending
         private LiquidLayerData liquidLayerData;
         private int maxLayers = 5;
         private Material liquidMaterial;
-        private float[] layerLerps;
         private float liquidHeight01 = 0f;
         private int currentLayer = 0;
         private bool shaderNeedUpdate = false;
@@ -59,7 +60,7 @@ namespace JY.Toon.Bartending
         private List<Rigidbody> iceRigid;
         private List<GameObject> iceObjPool;
         private int iceCountMax = 8;
-        private float[] bubbleInt;
+        
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -328,7 +329,7 @@ namespace JY.Toon.Bartending
                 Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
             }
             
-            layerLerps[currentLayer] = liquidLayerData.data.lerpRange;
+            float lerpRangeTarget = liquidLayerData.data.lerpRange;
             bubbleInt[currentLayer] = liquidLayerData.data.bubbleInt;
 
             // 计算当前层高度和下一层高度
@@ -344,7 +345,7 @@ namespace JY.Toon.Bartending
                         // 波浪动画
                         waveAmplitude = warpCurve.Evaluate(time);
                         // 渐变动画
-                        layerLerps[currentLayer] = Mathf.Lerp(0, layerLerps[currentLayer], lerpCurve.Evaluate(time));
+                        layerLerps[currentLayer] = Mathf.Lerp(0, lerpRangeTarget, lerpCurve.Evaluate(time));
                         
                         // 只设置一次更新标志
                         shaderNeedUpdate = true;
@@ -382,26 +383,39 @@ namespace JY.Toon.Bartending
             }
             averageColor /= currentLayer;
             averageBubbleInt /= currentLayer;
-
-            //混合动画
             int count = blendCount == 4 ? blendCount : currentLayer; // 要改变上面两层颜色
-            await BartendingAnimation.AnimationTimerAsync(
+            RenderTexture averageMask = BartendingAnimation.AverageMask(layerMaskTexArray, count);
+            //混合动画
+            UniTask blendTask =  BartendingAnimation.AnimationTimerAsync(
                 liquidBlendDuration,
                 (float time) => 
                 {
-                    
+                    Color[] layerColorTarget = layerColors;
+                    float[] bubbleIntTarget = bubbleInt;
                     for (int i = 0; i <= count; i++)
                     {
                         // 混合颜色
-                        layerColors[i] = Color.Lerp(layerColors[i], averageColor, blendCurve.Evaluate(time));
+                        layerColorTarget[i] = Color.Lerp(layerColors[i], averageColor, blendCurve.Evaluate(time));
                         // 混合泡沫强度
-                        bubbleInt[i] = Mathf.Lerp(bubbleInt[i], averageBubbleInt, bubbleCurve.Evaluate(time));
+                        bubbleIntTarget[i] = Mathf.Lerp(bubbleInt[i], averageBubbleInt, bubbleCurve.Evaluate(time));
+                        shaderNeedUpdate = true;
                     }
-                    // 混合mask
-                    //layerMaskTexArray
-                    shaderNeedUpdate = true;
+                    layerColors = layerColorTarget;
+                    bubbleInt = bubbleIntTarget;
                 }
             );
+            // 混合mask
+            UniTask blendMaskTask =  BartendingAnimation.MaskAnimationAsync(
+                liquidBlendDuration, 
+                layerMaskTexArray, 
+                (RenderTexture mask) => {
+                    layerMaskTexArray = mask;
+                    shaderNeedUpdate = true;        
+                }
+            );
+
+            await UniTask.WhenAll(blendMaskTask, blendTask);
+            averageMask.Release();
         }
 #endregion
 #region ResetLiquid
@@ -434,6 +448,7 @@ namespace JY.Toon.Bartending
             Debug.Log("已重置酒杯");
         }
 #endregion
+
 #region UI
         /// <summary>
         /// 设置UI
@@ -468,6 +483,12 @@ namespace JY.Toon.Bartending
                 liquidLayerData = liquidLayerDataList[0];
                 liquidLayerDropdown.onValueChanged.AddListener(SetLiquidLayerData);
             }
+        }
+
+        private void SetLiquidLayerData(int index)
+        {
+            if (index < 0 || index >= liquidLayerDataList.Count) return;
+            liquidLayerData = liquidLayerDataList[index];
         }
 #endregion
         private void OnGUI()

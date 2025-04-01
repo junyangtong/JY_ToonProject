@@ -50,7 +50,6 @@ Shader "JY/Toon/Liquid"
 
         half4 _LiquidLayerColor[MAX_LAYER];
         half _LiquidLayerLerpRange[MAX_LAYER];
-        half _LiquidLayerMaskInfo[MAX_LAYER];
         half _BubbleInt[MAX_LAYER];
         half _LiquidHeight01;
         half _WaveAmplitude;
@@ -208,7 +207,13 @@ Shader "JY/Toon/Liquid"
                 half lerp01 = smoothstep(nextID - lerpRange, nextID + lerpRange, liquidHeight0Max);
                 half layerWarpMask = 1.0 - abs(lerp01 - 0.5) * 2.0;
                 
-                // 静态遮罩
+                // 遮罩
+                half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
+                half bubbleMaskStep = step(0.99, bubbleMask);// 区分是否是气泡饮料 如果是气泡饮料mask向上移动
+                if(bubbleMaskStep > 0)
+                {
+                    input.uv.y += _Time.x * _BubbleSpeed;
+                }
                 half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, currentID)).r;
                 half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, nextID)).r;
                 half maskMixed = lerp(mask0, mask1, lerp01);
@@ -222,7 +227,6 @@ Shader "JY/Toon/Liquid"
                 // 气泡
                 float2 bubbleUV = input.uv;
                 bubbleUV.y += _Time.x * _BubbleSpeed;
-                half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
                 bubbleUV = ParallaxMappingUV(input.uv, input.viewDirTS);
                 bubbleMask *= SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
 
@@ -232,7 +236,7 @@ Shader "JY/Toon/Liquid"
                 finalColor = lerp(finalColor, finalColor*0.5, waterlineMask);//TODO:优化吃水线效果
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed;
-                return half4(finalColor, alpha);
+                return half4(finalColor, 1.0);
             }
             ENDHLSL
         }
