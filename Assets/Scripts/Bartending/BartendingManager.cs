@@ -33,8 +33,8 @@ namespace JY.Toon.Bartending
         [SerializeField] private AnimationCurve heightCurve;
         [SerializeField] private AnimationCurve warpCurve;
         [SerializeField] private AnimationCurve lerpCurve;
-        [SerializeField] private AnimationCurve blendCurve;
-        [SerializeField] private AnimationCurve bubbleCurve;
+        [SerializeField] private AnimationCurve blendColorCurve;
+        [SerializeField] private AnimationCurve blendBubbleCurve;
         
         [Header("Ice")]
         [SerializeField] private IceCount iceCount = IceCount.less;
@@ -60,7 +60,6 @@ namespace JY.Toon.Bartending
         private List<Rigidbody> iceRigid;
         private List<GameObject> iceObjPool;
         private int iceCountMax = 8;
-        
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -233,7 +232,7 @@ namespace JY.Toon.Bartending
         {
             if (layerNum > 0)
             {
-                if (layerMaskTexArray && layerNum != layerMaskTexArray.volumeDepth)
+                if (layerMaskTexArray != null && layerNum != layerMaskTexArray.volumeDepth)
                 {
                     layerMaskTexArray.Release();
                 }
@@ -321,9 +320,14 @@ namespace JY.Toon.Bartending
                 layerColors[currentLayer] = layerColor;
             }
 
-            // 更新mask2DArr
+            // 更新mask2DArr 不指定mask贴图时使用黑色
             Texture2D newMask = liquidLayerData.data.maskTex;
+            if (newMask == null)
+            {
+                newMask = Texture2D.blackTexture;
+            }
             Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
+
             if (currentLayer < maxLayers - 1) // 和颜色一样 每次填充上面两层
             {
                 Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
@@ -395,9 +399,9 @@ namespace JY.Toon.Bartending
                     for (int i = 0; i <= count; i++)
                     {
                         // 混合颜色
-                        layerColorTarget[i] = Color.Lerp(layerColors[i], averageColor, blendCurve.Evaluate(time));
+                        layerColorTarget[i] = Color.Lerp(layerColors[i], averageColor, blendColorCurve.Evaluate(time));
                         // 混合泡沫强度
-                        bubbleIntTarget[i] = Mathf.Lerp(bubbleInt[i], averageBubbleInt, bubbleCurve.Evaluate(time));
+                        bubbleIntTarget[i] = Mathf.Lerp(bubbleInt[i], averageBubbleInt, blendBubbleCurve.Evaluate(time));
                         shaderNeedUpdate = true;
                     }
                     layerColors = layerColorTarget;
@@ -492,9 +496,65 @@ namespace JY.Toon.Bartending
             liquidLayerData = liquidLayerDataList[index];
         }
 #endregion
+        private RenderTexture[] layerSlices;
         private void OnGUI()
         {
+            if (layerMaskTexArray == null) return;
             
+            // 初始化临时纹理
+            if (layerSlices == null || layerSlices.Length != layerMaskTexArray.volumeDepth)
+            {
+                if (layerSlices != null)
+                {
+                    foreach (var rt in layerSlices)
+                    {
+                        if (rt != null) rt.Release();
+                    }
+                }
+
+                layerSlices = new RenderTexture[layerMaskTexArray.volumeDepth];
+                for (int i = 0; i < layerSlices.Length; i++)
+                {
+                    layerSlices[i] = new RenderTexture(maskSize, maskSize, 0, RenderTextureFormat.R8);
+                    layerSlices[i].filterMode = FilterMode.Bilinear;
+                    layerSlices[i].wrapMode = TextureWrapMode.Clamp;
+                    layerSlices[i].Create();
+                }
+            }
+            
+            // 复制纹理数据并显示
+            float size = 100, padding = 10;
+            for (int i = 0; i < currentLayer; i++)
+            {
+                Graphics.CopyTexture(layerMaskTexArray, i, 0, 0, 0, maskSize, maskSize, layerSlices[i], 0, 0, 0, 0);
+                float y = padding + (size + padding) * i;
+
+                GUI.Box(new Rect(padding, y, size, size), $"Layer {i}");
+
+                GUI.DrawTexture(new Rect(padding + size + padding, y, size, size), layerSlices[i], ScaleMode.ScaleToFit, true);
+
+                GUI.Label(new Rect(padding + size*2 + padding*2, y, 200, 60), 
+                    $"Color: R{layerColors[i].r:F2} G{layerColors[i].g:F2} B{layerColors[i].b:F2}\n" +
+                    $"Lerp: {layerLerps[i]:F2}\n" +
+                    $"BubbleInt: {bubbleInt[i]:F2}");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // 释放纹理
+            if (layerMaskTexArray != null)
+            {
+                layerMaskTexArray.Release();
+            }
+
+            if (layerSlices != null)
+            {
+                foreach (var rt in layerSlices)
+                {
+                    if (rt != null) rt.Release();
+                }
+            }
         }
     }
 }

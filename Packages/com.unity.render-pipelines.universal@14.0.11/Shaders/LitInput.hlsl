@@ -130,6 +130,7 @@ TEXTURE2D(_SpecGlossMap);       SAMPLER(sampler_SpecGlossMap);
 TEXTURE2D(_ClearCoatMap);       SAMPLER(sampler_ClearCoatMap);
 #ifdef _GLASS
     TEXTURE2D(_MatCapTex);          SAMPLER(sampler_MatCapTex);
+    TEXTURE2D(_LiquidFinalTexture); SAMPLER(sampler_LiquidFinalTexture);
 #endif
 
 #ifdef _SPECULAR_SETUP

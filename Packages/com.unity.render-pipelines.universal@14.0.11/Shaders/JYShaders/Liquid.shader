@@ -4,6 +4,7 @@ Shader "JY/Toon/Liquid"
     {
         _Transparent ("Transparent", Range(0, 1)) = 1.0
         _CubeMap ("CubeMap", Cube) = "white" {}
+        _LerpNoise ("LerpNoise", 2D) = "white" {}
         _LayerWarpInt ("LayerWarpInt", Range(0, 1)) = 0.5
         _MaxLiquidHeight("MaxLiquidHeight", Float) = 1.0
         _LiquidHeightOffset ("LiquidHeightOffset", Float)  = 0.0
@@ -58,8 +59,9 @@ Shader "JY/Toon/Liquid"
 
         TEXTURE2D(_BubbleTex);   SAMPLER(sampler_BubbleTex);
         TEXTURECUBE(_CubeMap);   SAMPLER(sampler_CubeMap);
+        TEXTURE2D(_LerpNoise);   SAMPLER(sampler_LerpNoise);
         TEXTURE2D_ARRAY(_LiquidLayerMaskTex);   SAMPLER(sampler_LiquidLayerMaskTex);
-
+        
         struct Attributes
         {
             float4 positionOS : POSITION;
@@ -183,7 +185,6 @@ Shader "JY/Toon/Liquid"
             
             float4 DrawFrontFrag(Varyings input) : SV_Target
             {
-                input.uv *= 10;
                 // 计算相对坐标
                 float3 originPosWS = TransformObjectToWorld(float3(0.0, 0.0, 0.0));
                 float3 relativePos = input.positionWS.xyz - originPosWS;
@@ -206,28 +207,28 @@ Shader "JY/Toon/Liquid"
                 half lerpRange = _LiquidLayerLerpRange[min(MAX_LAYER - 1, currentID+1)];
                 half lerp01 = smoothstep(nextID - lerpRange, nextID + lerpRange, liquidHeight0Max);
                 half layerWarpMask = 1.0 - abs(lerp01 - 0.5) * 2.0;
+                half lerpNoise = SAMPLE_TEXTURE2D(_LerpNoise, sampler_LerpNoise, input.uv).r;
+                lerp01 = lerp01 + (lerpNoise - 0.5) * _LayerWarpInt * layerWarpMask;
                 
                 // 遮罩
-                half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, currentID)).r;
-                half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv, nextID)).r;
+                half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, currentID)).r;
+                half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, nextID)).r;
                 half maskMixed = lerp(mask0, mask1, lerp01);
 
                 // 混合颜色
-                lerp01 = lerp01 + (maskMixed - 0.5) * _LayerWarpInt * layerWarpMask;
                 half4 colorMixed = lerp(currentColor, nextColor, lerp01);
 
                 // 边缘光
                 half rimMask = _RimInt;
                 // 气泡
-                float2 bubbleUV = input.uv;
-                bubbleUV = ParallaxMappingUV(input.uv, input.viewDirTS, _BubbleParallax);
+                float2 bubbleUV = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleParallax);
                 bubbleUV.y += _Time.x * _BubbleSpeed;
                 half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
                 half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
-                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, ParallaxMappingUV(input.uv, input.viewDirTS, _BubbleParallax + 0.1)).r;
-                bubbleMask *= (outBubble + innerBubble);
+                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleParallax + 0.1)).r;
+                half bubbleCol = bubbleMask * (outBubble + innerBubble);
 
-                half3 finalColor = colorMixed.rgb + maskMixed.rrr + bubbleMask;
+                half3 finalColor = colorMixed.rgb + maskMixed.rrr + bubbleCol;
                 // 吃水线
                 half waterlineMask = smoothstep(_WaterLineWidth, 0, clipPos);
                 finalColor = lerp(finalColor, finalColor*0.5, waterlineMask);//TODO:优化吃水线效果

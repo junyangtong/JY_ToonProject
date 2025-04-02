@@ -92,6 +92,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _LerpNoise:
+        m_Texture: {fileID: 2800000, guid: 2d6c03331d0250c4e991623ccbde740c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _LerpWarpTex:
         m_Texture: {fileID: 2800000, guid: c27e0f81780a74d4684359f2c4eb351d, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -175,10 +179,10 @@ Material:
     - _GlossinessSource: 0
     - _GlossyReflections: 1
     - _HeightWarpInt: 0.19
-    - _LayerWarpInt: 0.5
+    - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.8
+    - _LiquidHeight01: 0.2
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1

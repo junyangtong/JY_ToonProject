@@ -20,6 +20,7 @@ namespace JY.Toon.Bartending
         private static int k_AverageMask;
         private static int k_LerpMask;
         private static RenderTexture averageMask;
+        private static RenderTexture copyMaskTexArray;
         private static int maskSize = BartendingManager.Instance.MaskSize;
 
         /// <summary>
@@ -54,6 +55,12 @@ namespace JY.Toon.Bartending
         /// </summary>
         public static RenderTexture AverageMask(RenderTexture layerMaskTexArray, int count)
         {
+            if (copyMaskTexArray != null)
+            {
+                copyMaskTexArray.Release();
+            }
+            copyMaskTexArray = BartendingManager.Instance.CopyMaskTexArray();
+            
             if (averageMask != null)
             {
                 averageMask.Release();
@@ -86,20 +93,21 @@ namespace JY.Toon.Bartending
         public static async UniTask MaskAnimationAsync(float duration, RenderTexture layerMaskTexArray, Action<RenderTexture> callback)
         {
             isAnimating = true;
+            
+            uint tSize_X, tSize_Y, tSize_Z;
+            maskBlendCS.GetKernelThreadGroupSizes(k_LerpMask, out tSize_X, out tSize_Y, out tSize_Z);
+            Vector3Int gSize = new Vector3Int(
+                Mathf.CeilToInt(averageMask.width / (float) tSize_X),
+                Mathf.CeilToInt(averageMask.height / (float) tSize_Y),
+                Mathf.CeilToInt(layerMaskTexArray.volumeDepth / (float) tSize_Z)
+            );
+
             float elapsedTime = 0f;
+
             while (elapsedTime < duration)
             {
                 float time = elapsedTime / duration;
-                uint tSize_X, tSize_Y, tSize_Z;
-                maskBlendCS.GetKernelThreadGroupSizes(k_LerpMask, out tSize_X, out tSize_Y, out tSize_Z);
-                Vector3Int gSize = new Vector3Int(
-                    Mathf.CeilToInt(averageMask.width / (float) tSize_X),
-                    Mathf.CeilToInt(averageMask.height / (float) tSize_Y),
-                    1
-                );
                 
-                RenderTexture copyMaskTexArray = BartendingManager.Instance.CopyMaskTexArray();
-
                 maskBlendCS.SetTexture(k_LerpMask, "_OutMaskTex2DArr", layerMaskTexArray);
                 maskBlendCS.SetTexture(k_LerpMask, "_SrcMaskTex2DArr", copyMaskTexArray);
                 maskBlendCS.SetTexture(k_LerpMask, "_DstMaskTex2D", averageMask);
@@ -109,7 +117,9 @@ namespace JY.Toon.Bartending
                 await UniTask.Yield();
                 elapsedTime += Time.deltaTime;
             }
-            
+            // 混合结束 释放rt
+            averageMask.Release();
+            copyMaskTexArray.Release();
             isAnimating = false;
         }
     }

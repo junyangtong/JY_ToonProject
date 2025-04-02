@@ -69,7 +69,7 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     
     finalColor.a = surfaceData.alpha;
     
-    return finalColor;
+    return SAMPLE_TEXTURE2D(_LiquidFinalTexture, sampler_LiquidFinalTexture, screenUV);
 }
 
 #endif // UNIVERSAL_GLASS_INCLUDED

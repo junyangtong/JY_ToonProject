@@ -134,6 +134,13 @@ namespace JY.Toon.Bartending
                 cmd.DrawProcedural(Matrix4x4.identity, mergeMat, 0, MeshTopology.Triangles, 3, 1);
             }
 
+            // Pass6 copy场景
+            using (new ProfilingScope(cmd, profilingSampler_Scene))
+            {
+                Blitter.BlitCameraTexture(cmd, sRdr_Camera.cameraColorTargetHandle, handle_SceneColor, 0, false);
+            }
+            cmd.SetGlobalTexture("_LiquidFinalTexture", handle_SceneColor);
+
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
             CommandBufferPool.Release(cmd);
@@ -143,6 +150,12 @@ namespace JY.Toon.Bartending
         {
             handle_SceneColor?.Release();
             handle_SceneDepth?.Release();
+            handle_IceColor?.Release();
+            handle_IceDepth?.Release();
+            handle_FrontLiquidColor?.Release();
+            handle_FrontLiquidDepth?.Release();
+            handle_BackLiquidColor?.Release();
+            handle_BackLiquidDepth?.Release();
             CoreUtils.Destroy(mergeMat);
         }
     }

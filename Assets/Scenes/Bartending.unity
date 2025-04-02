@@ -2346,49 +2346,31 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  blendCurve:
+  blendColorCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0.015851254
-      outSlope: 0.015851254
-      tangentMode: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.1487889
+      outWeight: 0
     - serializedVersion: 3
-      time: 1.8439925
-      value: 0.041087568
-      inSlope: 0.03958381
-      outSlope: 0.03958381
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.2558786
-    - serializedVersion: 3
-      time: 2.7128453
-      value: 0.18357462
-      inSlope: 0.3864908
-      outSlope: 0.3864908
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.89231694
-    - serializedVersion: 3
-      time: 3
+      time: 1
       value: 1
-      inSlope: 0.8330694
-      outSlope: 0.8330694
-      tangentMode: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
-      inWeight: 0.05709356
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  bubbleCurve:
+  blendBubbleCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
