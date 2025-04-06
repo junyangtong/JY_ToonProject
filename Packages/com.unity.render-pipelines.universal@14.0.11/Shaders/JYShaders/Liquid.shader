@@ -225,7 +225,7 @@ Shader "JY/Toon/Liquid"
                 bubbleUV.y += _Time.x * _BubbleSpeed;
                 half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
                 half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
-                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleParallax + 0.1)).r;
+                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleParallax + 0.3) * 0.5).r;
                 half bubbleCol = bubbleMask * (outBubble + innerBubble);
 
                 half3 finalColor = colorMixed.rgb + maskMixed.rrr + bubbleCol;
@@ -234,7 +234,7 @@ Shader "JY/Toon/Liquid"
                 finalColor = lerp(finalColor, finalColor*0.5, waterlineMask);//TODO:优化吃水线效果
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed;
-                return half4(finalColor, 1.0);
+                return half4(finalColor, alpha);
             }
             ENDHLSL
         }

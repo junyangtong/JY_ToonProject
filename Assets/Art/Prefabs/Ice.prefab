@@ -146,9 +146,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12edef2bce7f0c642ae640f17cfd7dab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buoyancyForceStrength: 28
+  buoyancyForceStrength: 10
   maxBuoyancyForce: 100
-  centerToBottomOffset: 0.23
+  centerToBottomOffset: 0.9
   drag: {x: 1, y: 1, z: 1}
-  angularDrag: 0.05
+  angularDrag: 0.01
   buoyancyTorqueStrength: 250

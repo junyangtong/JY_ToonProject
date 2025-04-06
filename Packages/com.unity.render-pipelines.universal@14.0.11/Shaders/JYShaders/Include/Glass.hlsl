@@ -46,7 +46,8 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
 
     // 计算最终折射UV
     float2 refractionUV = screenUV + distortion * _RefractIntensity;
-    half3 refractionColor = surfaceData.albedo * SampleSceneColor(refractionUV).rgb;
+    half3 sceneColor = SAMPLE_TEXTURE2D(_LiquidFinalTexture, sampler_LiquidFinalTexture, refractionUV).rgb;
+    half3 refractionColor = surfaceData.albedo * sceneColor;
     surfaceData.albedo = refractionColor;
 
     float2 matcapUV = GetMatcapUV(inputData.normalWS);
@@ -69,7 +70,7 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     
     finalColor.a = surfaceData.alpha;
     
-    return SAMPLE_TEXTURE2D(_LiquidFinalTexture, sampler_LiquidFinalTexture, screenUV);
+    return finalColor;
 }
 
 #endif // UNIVERSAL_GLASS_INCLUDED
