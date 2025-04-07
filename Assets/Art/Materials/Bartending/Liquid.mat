@@ -93,7 +93,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LerpNoise:
-        m_Texture: {fileID: 2800000, guid: ff2c9f02e512dbe4b858a67d562db96b, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3f40c4f5bb11dfd498a2ed388fcbe0c3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LerpWarpTex:
@@ -154,7 +154,9 @@ Material:
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
+    - _BubbleInParallax: 1.05
     - _BubbleInt: 1
+    - _BubbleOutParallax: 0.13
     - _BubbleParallax: 0
     - _BubblePlxBias: 0.1
     - _BubbleSpeed: -2.44
@@ -182,13 +184,13 @@ Material:
     - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 1
+    - _LiquidHeight01: 0.6
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
     - _MaskUVScale: 1
     - _MaxLayers: 5
-    - _MaxLiquidHeight: 2.8
+    - _MaxLiquidHeight: 1.93
     - _MaxLiquidHeightOS: 1
     - _Metallic: 0
     - _Mode: 0

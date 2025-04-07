@@ -35,7 +35,7 @@ namespace JY.Toon.Bartending
         [SerializeField] private AnimationCurve lerpCurve;
         [SerializeField] private AnimationCurve blendColorCurve;
         [SerializeField] private AnimationCurve blendBubbleCurve;
-        
+        [SerializeField] private Animation spoonAnim;
         [Header("Ice")]
         [SerializeField] private IceCount iceCount = IceCount.less;
         [SerializeField] private GameObject iceObj;
@@ -371,7 +371,7 @@ namespace JY.Toon.Bartending
                 Debug.Log("少于两层液体无法搅拌！");
                 return;
             }
-             if (BartendingAnimation.IsAnimating)
+            if (BartendingAnimation.IsAnimating)
             {
                 Debug.Log("正在播放动画，无法搅拌！");
                 return;
@@ -389,7 +389,16 @@ namespace JY.Toon.Bartending
             averageBubbleInt /= currentLayer;
             int count = blendCount == 4 ? blendCount : currentLayer; // 要改变上面两层颜色
             RenderTexture averageMask = BartendingAnimation.AverageMask(layerMaskTexArray, count);
-            //混合动画
+            // 勺子动画
+            if (spoonAnim != null)
+            {
+                spoonAnim.Play("Spoon");
+            }
+            else
+            {
+                Debug.LogError("<BartendingManager> spoonAnim未指定");
+            }
+            // 混合渐变动画
             UniTask blendTask =  BartendingAnimation.AnimationTimerAsync(
                 liquidBlendDuration,
                 (float time) => 

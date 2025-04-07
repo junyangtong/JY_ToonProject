@@ -20,9 +20,6 @@ Shader "JY/Toon/Ice"
         Pass
         {
             Name "ForwardLit"
-/*             ZTest Off
-            ZWrite On
-            Blend SrcAlpha OneMinusSrcAlpha */
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -109,7 +106,7 @@ Shader "JY/Toon/Ice"
                 half4 matcapColor = SAMPLE_TEXTURE2D(_MatCapTex, sampler_MatCapTex, matcapUV);
                 half3 finalColor = albedo + matcapColor.rgb;
 
-                return half4(finalColor, 1.0);
+                return half4(finalColor, input.positionCS.z);
             }
             ENDHLSL
         }

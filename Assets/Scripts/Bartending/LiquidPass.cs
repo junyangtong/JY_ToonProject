@@ -65,10 +65,13 @@ namespace JY.Toon.Bartending
             // 场景RT
             RenderingUtils.ReAllocateIfNeeded(ref handle_SceneColor, colorDesc);
             RenderingUtils.ReAllocateIfNeeded(ref handle_SceneDepth, depthDesc);
+            // 冰块 RT
             RenderingUtils.ReAllocateIfNeeded(ref handle_IceColor, colorDesc);
             RenderingUtils.ReAllocateIfNeeded(ref handle_IceDepth, depthDesc);
+            // front液体RT
             RenderingUtils.ReAllocateIfNeeded(ref handle_FrontLiquidColor, colorDesc);
             RenderingUtils.ReAllocateIfNeeded(ref handle_FrontLiquidDepth, depthDesc);
+            // back液体RT
             RenderingUtils.ReAllocateIfNeeded(ref handle_BackLiquidColor, colorDesc);   
             RenderingUtils.ReAllocateIfNeeded(ref handle_BackLiquidDepth, depthDesc);
         }
@@ -116,7 +119,6 @@ namespace JY.Toon.Bartending
                 }
             }
             mergeMat.SetTexture(id_IceColorBuffer, handle_IceColor);
-            mergeMat.SetTexture(id_IceDepthBuffer, handle_IceDepth);
 
             // Pass4 液体Front
             using (new ProfilingScope(cmd, profilingSampler_Liquid))
@@ -134,7 +136,7 @@ namespace JY.Toon.Bartending
                 cmd.DrawProcedural(Matrix4x4.identity, mergeMat, 0, MeshTopology.Triangles, 3, 1);
             }
 
-            // Pass6 copy场景
+            // Pass6 copy场景给杯子做折射
             using (new ProfilingScope(cmd, profilingSampler_Scene))
             {
                 Blitter.BlitCameraTexture(cmd, sRdr_Camera.cameraColorTargetHandle, handle_SceneColor, 0, false);

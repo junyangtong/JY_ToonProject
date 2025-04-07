@@ -10,7 +10,8 @@ Shader "JY/Toon/Liquid"
         _LiquidHeightOffset ("LiquidHeightOffset", Float)  = 0.0
 
         _BubbleTex ("BubbleTex", 2D) = "white" {}
-        _BubbleParallax ("BubbleParallax", Float) = 0.3
+        _BubbleOutParallax ("BubbleOutParallax", Float) = 0.02
+        _BubbleInParallax ("BubbleInParallax", Float) = 0.3
         _BubbleSpeed ("BubbleSpeed", Float) = 1.0
 
         _WaveAmplitude ("WaveAmplitude", Float) = 0.3
@@ -42,7 +43,8 @@ Shader "JY/Toon/Liquid"
             half _LiquidHeightOffset;
             half _LayerWarpInt;
             half _BubbleSpeed;
-            half _BubbleParallax;
+            half _BubbleOutParallax;
+            half _BubbleInParallax;
             half _Transparent;
             half _WaterLineWidth;
             half _RimInt;
@@ -163,7 +165,6 @@ Shader "JY/Toon/Liquid"
         
         ENDHLSL
 
-        // TODO:使用RenderObj代替多pass?
         Pass
         {
             Name "Draw Front"
@@ -221,11 +222,12 @@ Shader "JY/Toon/Liquid"
                 // 边缘光
                 half rimMask = _RimInt;
                 // 气泡
-                float2 bubbleUV = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleParallax);
-                bubbleUV.y += _Time.x * _BubbleSpeed;
+                float2 bubbleUV1 = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleOutParallax);
+                bubbleUV1.y += _Time.x * _BubbleSpeed;
+                float2 bubbleUV2 = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleInParallax) * 0.5;
                 half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
-                half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
-                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleParallax + 0.3) * 0.5).r;
+                half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV1).r;
+                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r;
                 half bubbleCol = bubbleMask * (outBubble + innerBubble);
 
                 half3 finalColor = colorMixed.rgb + maskMixed.rrr + bubbleCol;
@@ -250,7 +252,7 @@ Shader "JY/Toon/Liquid"
                 Pass Replace
             }
             Cull Front
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend One Zero
             ZWrite On
             
             HLSLPROGRAM
@@ -290,27 +292,28 @@ Shader "JY/Toon/Liquid"
                 // 静态遮罩
                 half mask = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(intersectPosWS.xz, currentIDMax)).r;// 取当前最高层遮罩
 
-                /* // 气泡
-                float2 bubbleUV = input.uv;
-                bubbleUV.y += _Time.x * _BubbleSpeed;
-                half bubbleMask = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
-                bubbleUV = ParallaxMappingUV(input.uv, input.viewDirTS);
-                bubbleUV = (intersectPosWS - originPosWS).xz;    
-                bubbleMask += SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV).r;
-                half3 bubbleColor = bubbleMask; */
-                
                 // 深浅水变化
                 half shallowFactor = smoothstep(_ShallowRange, _ShallowRange + 0.3, clipPos);
                 half4 currentColorMax = _LiquidLayerColor[currentIDMax];// 取当前最高层颜色
                 half3 finalColor = currentColorMax.rgb;
                 half alpha = _Transparent * currentColorMax.a;
-                alpha = lerp(alpha * 0.8, alpha, shallowFactor);
+                alpha = lerp(alpha * 0.9, alpha, shallowFactor);
 
+                // 水面边缘遮罩
                 float3 center = originPosWS;
                 center.y += liquidHeightOS;
-                float circleDistance = length((intersectPosWS - center).xz);
-                float circleMask = smoothstep(0.8, 1.0, circleDistance);
+                half circleDistance = length((intersectPosWS - center).xz);
+                half circleMask = smoothstep(0.5, 1.0, circleDistance);
                 finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb + 0.2, circleMask);//混合深浅颜色
+
+                // 气泡
+                float2 bubbleUV1 = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleOutParallax);
+                bubbleUV1.y += _Time.x * _BubbleSpeed;
+                float2 bubbleUV2 = intersectPosWS.xz;
+                half bubbleMask = _BubbleInt[currentID];
+                half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV1).r * (1.0 - shallowFactor);  // 液面透出的上升气泡
+                half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r * circleMask;           // 液面上的静止气泡
+                half bubbleCol = bubbleMask * (outBubble + innerBubble);
                 
                 // 反射
                 half fresnel = normalize(input.viewDirWS).y;
@@ -318,7 +321,7 @@ Shader "JY/Toon/Liquid"
                 half4 reflectionColor = SAMPLE_TEXTURECUBE(_CubeMap, sampler_CubeMap, reflectionUV);
                 
                 alpha = lerp(alpha, alpha + max(max(reflectionColor.r, reflectionColor.g), reflectionColor.b), fresnel) + mask;   //反射要写入alpha后面混合使用
-                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + mask.rrr;
+                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + mask.rrr + bubbleCol;
                 return half4(finalColor, alpha);
             }
             ENDHLSL

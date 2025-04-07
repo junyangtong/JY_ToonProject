@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     layerName: "\u7D2B\u8272"
-    color: {r: 0.437037, g: 0, b: 1, a: 0.5019608}
+    color: {r: 0.4380164, g: 0, b: 1, a: 0.5019608}
     maskTex: {fileID: 0}
     lerpRange: 0.3
     bubbleInt: 1
