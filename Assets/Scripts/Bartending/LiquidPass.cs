@@ -66,7 +66,9 @@ namespace JY.Toon.Bartending
             RenderingUtils.ReAllocateIfNeeded(ref handle_SceneColor, colorDesc);
             RenderingUtils.ReAllocateIfNeeded(ref handle_SceneDepth, depthDesc);
             // 冰块 RT
+            colorDesc.colorFormat = RenderTextureFormat.ARGBHalf;
             RenderingUtils.ReAllocateIfNeeded(ref handle_IceColor, colorDesc);
+            colorDesc.colorFormat = RenderTextureFormat.ARGB32;
             RenderingUtils.ReAllocateIfNeeded(ref handle_IceDepth, depthDesc);
             // front液体RT
             RenderingUtils.ReAllocateIfNeeded(ref handle_FrontLiquidColor, colorDesc);

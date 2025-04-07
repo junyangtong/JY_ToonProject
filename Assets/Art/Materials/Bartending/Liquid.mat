@@ -184,13 +184,13 @@ Material:
     - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.6
+    - _LiquidHeight01: 0.8
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
     - _MaskUVScale: 1
     - _MaxLayers: 5
-    - _MaxLiquidHeight: 1.93
+    - _MaxLiquidHeight: 2.9
     - _MaxLiquidHeightOS: 1
     - _Metallic: 0
     - _Mode: 0
