@@ -35,6 +35,7 @@ namespace JY.Toon.Bartending
         [SerializeField] private AnimationCurve lerpCurve;
         [SerializeField] private AnimationCurve blendColorCurve;
         [SerializeField] private AnimationCurve blendBubbleCurve;
+        [SerializeField] private AnimationCurve blendMaskCurve;
         [SerializeField] private Animation spoonAnim;
         [Header("Ice")]
         [SerializeField] private IceCount iceCount = IceCount.less;
@@ -392,7 +393,7 @@ namespace JY.Toon.Bartending
             // 勺子动画
             if (spoonAnim != null)
             {
-                spoonAnim.Play("Spoon");
+                spoonAnim.Play("blend");
             }
             else
             {
@@ -425,6 +426,7 @@ namespace JY.Toon.Bartending
                     layerMaskTexArray = mask;
                     shaderNeedUpdate = true;        
                 }
+                ,blendMaskCurve
             );
 
             await UniTask.WhenAll(blendMaskTask, blendTask);

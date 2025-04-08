@@ -71,15 +71,17 @@ Shader "JY/Toon/LiquidMerge"
                 float4 backLiquidColor = SAMPLE_TEXTURE2D(_BackLiquidColorBuffer, sampler_BackLiquidColorBuffer, input.texcoord);   
                 float backLiquidDepth = SAMPLE_TEXTURE2D(_BackLiquidDepthBuffer, sampler_BackLiquidDepthBuffer, input.texcoord).r;
 
-                // 混合
+                // 混合颜色
                 backLiquidColor = lerp(backLiquidColor, 0.0, step(backLiquidDepth, sceneDepth));
                 half4 iceAndBackGround = lerp(sceneColor, iceColor, step(0.001, iceColor.a));
                 half4 back = lerp(lerp(iceAndBackGround, backLiquidColor, backLiquidColor.a), iceAndBackGround, step(backLiquidDepth, iceColor.a));
 
-                half4 front = lerp(iceColor, lerp(sceneColor, frontLiquidColor, frontLiquidColor.a), frontLiquidColor.a);
-                half4 finalColor = lerp(front, back, step(frontLiquidDepth, sceneDepth));
+                half4 front = lerp(iceColor, frontLiquidColor, frontLiquidColor.a);
+                half4 finalColor = lerp(back, front, frontLiquidColor.a);
                 
-                depthOUT = lerp(sceneDepth, iceColor.a, step(0.001, iceColor.a));
+                // 混合深度
+                half liquidDepth = frontLiquidDepth + backLiquidDepth;
+                depthOUT = lerp(liquidDepth, iceColor.a, step(liquidDepth, iceColor.a));
                 return finalColor;
             }
             ENDHLSL

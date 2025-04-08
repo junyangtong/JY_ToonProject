@@ -90,7 +90,7 @@ namespace JY.Toon.Bartending
         /// <summary>
         /// mask texarray 过渡到 averageMask
         /// </summary>
-        public static async UniTask MaskAnimationAsync(float duration, RenderTexture layerMaskTexArray, Action<RenderTexture> callback)
+        public static async UniTask MaskAnimationAsync(float duration, RenderTexture layerMaskTexArray, Action<RenderTexture> callback, AnimationCurve Curve)
         {
             isAnimating = true;
             
@@ -107,7 +107,7 @@ namespace JY.Toon.Bartending
             while (elapsedTime < duration)
             {
                 float time = elapsedTime / duration;
-                
+                time = Curve.Evaluate(time);
                 maskBlendCS.SetTexture(k_LerpMask, "_OutMaskTex2DArr", layerMaskTexArray);
                 maskBlendCS.SetTexture(k_LerpMask, "_SrcMaskTex2DArr", copyMaskTexArray);
                 maskBlendCS.SetTexture(k_LerpMask, "_DstMaskTex2D", averageMask);
