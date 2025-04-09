@@ -33,6 +33,7 @@ half _Surface;
 // Glass
 half _RefractIntensity;
 half _Thinkness;
+half _FresnelIntensity;
 CBUFFER_END
 
 // NOTE: Do not ifdef the properties for dots instancing, but ifdef the actual usage.

@@ -44,6 +44,7 @@ Shader "JY/JYLit"
         _MatCapTex ("Texture", 2D) = "white" {}
         _RefractIntensity("RefractIntensity", float) = 1
         _Thinkness("Thinkness", float) = 1
+        _FresnelIntensity("FresnelIntensity", float) = 1
 
         // SRP batching compatibility for Clear Coat (Not used in Lit)
         [HideInInspector] _ClearCoatMask("_ClearCoatMask", Float) = 0.0

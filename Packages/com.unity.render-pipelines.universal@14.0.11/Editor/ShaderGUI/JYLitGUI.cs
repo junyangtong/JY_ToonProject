@@ -12,7 +12,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
         MaterialProperty _MatCapTex;
         MaterialProperty _RefractIntensity;
         MaterialProperty _Thinkness;
-
+        MaterialProperty _FresnelIntensity;
 
         public static readonly GUIContent hiInputs = EditorGUIUtility.TrTextContent("Glass Inputs",
             "These control the Glass property.");
@@ -34,6 +34,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
                 materialEditor.TexturePropertySingleLine(new GUIContent("MatCap Tex"), _MatCapTex);
                 materialEditor.ShaderProperty(_RefractIntensity, "Refract Intensity");
                 materialEditor.ShaderProperty(_Thinkness, "Thinkness");
+                materialEditor.ShaderProperty(_FresnelIntensity, "Fresnel Intensity");
             }
             return true;
         }
@@ -47,6 +48,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
             _MatCapTex = FindProperty("_MatCapTex", properties);
             _RefractIntensity = FindProperty("_RefractIntensity", properties);
             _Thinkness = FindProperty("_Thinkness", properties);
+            _FresnelIntensity = FindProperty("_FresnelIntensity", properties);
         }
 
         // material changed check

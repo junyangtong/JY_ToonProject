@@ -37,15 +37,19 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
 
     // Glass
     // 菲涅尔
-    half fresnel = pow(1.0 - saturate(dot(inputData.normalWS, inputData.viewDirectionWS)), _Thinkness + 0.0001);
+    half nDotV = dot(inputData.normalWS, inputData.viewDirectionWS);
+    half fresnel = pow(1.0 - saturate(nDotV), _FresnelIntensity + 0.0001);
     
     // 折射效果计算
     float2 screenUV = inputData.normalizedScreenSpaceUV;
     float3 normalVS = mul((float3x3)UNITY_MATRIX_V, inputData.normalWS);
     float2 distortion = normalVS.xy;
 
+    // 计算厚度
+    float thickness = 1 - smoothstep(0.0, _Thinkness, nDotV);
+
     // 计算最终折射UV
-    float2 refractionUV = screenUV + distortion * _RefractIntensity;
+    float2 refractionUV = screenUV + distortion * _RefractIntensity * thickness;
     half3 sceneColor = SAMPLE_TEXTURE2D(_LiquidFinalTexture, sampler_LiquidFinalTexture, refractionUV).rgb;
     half3 refractionColor = surfaceData.albedo * sceneColor;
     surfaceData.albedo = refractionColor;

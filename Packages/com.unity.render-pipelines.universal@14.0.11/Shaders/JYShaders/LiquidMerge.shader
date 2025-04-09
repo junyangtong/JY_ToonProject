@@ -80,7 +80,7 @@ Shader "JY/Toon/LiquidMerge"
                 half4 finalColor = lerp(back, front, frontLiquidColor.a);
                 
                 // 混合深度
-                half liquidDepth = frontLiquidDepth + backLiquidDepth;
+                half liquidDepth = max(frontLiquidDepth, backLiquidDepth);
                 depthOUT = lerp(liquidDepth, iceColor.a, step(liquidDepth, iceColor.a));
                 return finalColor;
             }
