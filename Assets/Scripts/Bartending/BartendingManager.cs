@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,6 +49,7 @@ namespace JY.Toon.Bartending
         [SerializeField] private Button addIceButton; 
         [SerializeField] private Button blendButton; 
         [SerializeField] private Dropdown liquidLayerDropdown; 
+        [SerializeField] private Dropdown iceCountDropdown; 
         
         private LiquidLayerData liquidLayerData;
         private int maxLayers = 5;
@@ -73,7 +75,7 @@ namespace JY.Toon.Bartending
         /// <summary>
         /// 冰块数量
         /// </summary>
-        enum IceCount
+        public enum IceCount
         {
             None = 0,
             less = 3,
@@ -158,7 +160,7 @@ namespace JY.Toon.Bartending
             for (int i = 0; i < (int)iceCount; i++)
             {
                 iceObjPool[i].SetActive(true);
-                iceObjPool[i].transform.position = initalPosition;
+                iceObjPool[i].transform.position = initalPosition + new Vector3(UnityEngine.Random.Range(-0.2f, 0.2f), UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-0.2f, 0.2f));
                 iceObjPool[i].GetComponent<Renderer>().enabled = false;
                 iceRigid.Add(iceObjPool[i].GetComponent<Rigidbody>());
             }
@@ -499,12 +501,35 @@ namespace JY.Toon.Bartending
                 liquidLayerData = liquidLayerDataList[0];
                 liquidLayerDropdown.onValueChanged.AddListener(SetLiquidLayerData);
             }
+            if (iceCountDropdown != null)
+            {
+                iceCountDropdown.ClearOptions();
+
+                IceCount[] enumValues = (IceCount[])Enum.GetValues(typeof(IceCount));
+                List<string> options = new List<string>();
+
+                foreach (var value in enumValues)
+                {
+                    options.Add(value.ToString());
+                }
+                iceCountDropdown.AddOptions(options);
+                iceCountDropdown.value = Array.IndexOf(enumValues, iceCount);
+                iceCountDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+            }
         }
 
         private void SetLiquidLayerData(int index)
         {
             if (index < 0 || index >= liquidLayerDataList.Count) return;
             liquidLayerData = liquidLayerDataList[index];
+        }
+        private void OnDropdownValueChanged(int selectedIndex)
+        {
+            IceCount[] enumValues = (IceCount[])Enum.GetValues(typeof(IceCount));
+            if (selectedIndex >= 0 && selectedIndex < enumValues.Length)
+            {
+                iceCount = enumValues[selectedIndex];
+            }
         }
 #endregion
         private RenderTexture[] layerSlices;
