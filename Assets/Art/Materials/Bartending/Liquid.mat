@@ -185,7 +185,7 @@ Material:
     - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.4
+    - _LiquidHeight01: 1
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
@@ -200,7 +200,7 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _ReflectionSource: 0
-    - _RimInt: 0.5
+    - _RimInt: 3
     - _ShallowRange: -0.09
     - _Shininess: 1
     - _Smoothness: 0.5
@@ -238,4 +238,5 @@ Material:
     - _Layer8: {r: 0.5, g: 0.3, b: 0.1, a: 0.8}
     - _Layer9: {r: 0.5, g: 0.3, b: 0.1, a: 0.8}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
+    - _UVOffest: {r: -0.060983658, g: -0.060983658, b: 0, a: 0}
   m_BuildTextureStacks: []

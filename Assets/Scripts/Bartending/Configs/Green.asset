@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 94f4534d713902748a1458794ef198ff, type: 3}
-  m_Name: "\u4E73\u767D"
+  m_Name: Green
   m_EditorClassIdentifier: 
   data:
-    layerName: "\u4E73\u767D"
-    color: {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 1}
-    maskTex: {fileID: 2800000, guid: 11004275970a28048b61f4e07f880a31, type: 3}
+    layerName: Green
+    color: {r: 0.2216981, g: 1, b: 0.61415875, a: 0.5764706}
+    maskTex: {fileID: 0}
     lerpRange: 0.3
-    bubbleInt: 0
+    bubbleInt: 6.14

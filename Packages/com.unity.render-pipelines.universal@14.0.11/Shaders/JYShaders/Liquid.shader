@@ -26,6 +26,10 @@ Shader "JY/Toon/Liquid"
         [Header(Back)]
         _ShallowRange("Shallow Range", Float) = 1.0
         _FakePlaneUVTiling ("Fake Plane UvTiling", Float) = 1.0
+
+        [Header(Animation)]
+        _UVOffest("UVOffest XY:Blend ZW:Pour", Vector) = (0.0, 0.0, 0.0, 0.0)
+
     }
     
     SubShader
@@ -62,6 +66,7 @@ Shader "JY/Toon/Liquid"
         half _WaveAmplitude;
         half _WaveFrequency;
         half _WaveSpeed;
+        half4 _UVOffest;
 
         TEXTURE2D(_BubbleTex);   SAMPLER(sampler_BubbleTex);
         TEXTURECUBE(_CubeMap);   SAMPLER(sampler_CubeMap);
@@ -84,6 +89,7 @@ Shader "JY/Toon/Liquid"
             float3 positionWS : TEXCOORD2;
             float3 viewDirTS : TEXCOORD3;
             float3 viewDirWS : TEXCOORD4;
+            float3 normalWS : TEXCOORD5;
         };
 
         Varyings vert(Attributes input)
@@ -103,6 +109,7 @@ Shader "JY/Toon/Liquid"
             float3x3 worldToTangent = transpose(tangentToWorld);
             output.viewDirWS = GetWorldSpaceViewDir(vertexInput.positionWS);
             output.viewDirTS = mul(worldToTangent, output.viewDirWS);
+            output.normalWS = normalInput.normalWS;
 
             output.uv = input.uv;
             return output;
@@ -214,7 +221,14 @@ Shader "JY/Toon/Liquid"
                 half layerWarpMask = 1.0 - abs(lerp01 - 0.5) * 2.0;
                 half lerpNoise = SAMPLE_TEXTURE2D(_LerpNoise, sampler_LerpNoise, input.uv).r;
                 lerp01 = lerp01 + (lerpNoise - 0.5) * _LayerWarpInt * layerWarpMask;
-                
+
+                // 边缘遮罩
+                half rimMask = pow(saturate(dot(input.normalWS, normalize(input.viewDirWS))), _RimInt);
+
+                // UV动画
+                input.uv += _UVOffest.xy;
+                input.uv += _UVOffest.zw * rimMask;
+
                 // 遮罩
                 half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, currentID)).r;
                 half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, nextID)).r;
@@ -223,8 +237,6 @@ Shader "JY/Toon/Liquid"
                 // 混合颜色
                 half4 colorMixed = lerp(currentColor, nextColor, lerp01);
 
-                // 边缘光
-                half rimMask = _RimInt;
                 // 气泡
                 float2 bubbleUV1 = ParallaxMappingUV(input.uv*_UVTiling, input.viewDirTS, _BubbleOutParallax);
                 bubbleUV1.y += _Time.x * _BubbleSpeed;
@@ -232,10 +244,10 @@ Shader "JY/Toon/Liquid"
                 half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
                 half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV1).r;
                 half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r;
-                half3 bubbleCol = bubbleMask * (outBubble + innerBubble) * colorMixed.rgb;
+                half3 bubbleCol = bubbleMask * (outBubble + innerBubble) * colorMixed.rgb * rimMask;
 
                 // 遮罩颜色
-                half3 maskCol = maskMixed.r * colorMixed.rgb;
+                half3 maskCol = maskMixed.r * colorMixed.rgb * rimMask;
 
                 half3 finalColor = colorMixed.rgb + maskCol + bubbleCol;
                 // 吃水线
@@ -243,7 +255,7 @@ Shader "JY/Toon/Liquid"
                 finalColor = lerp(finalColor, finalColor * 0.8, waterlineMask);
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed;
-                return half4(finalColor, alpha);
+                return half4(finalColor, saturate(alpha));
             }
             ENDHLSL
         }
@@ -332,7 +344,7 @@ Shader "JY/Toon/Liquid"
                 
                 alpha = lerp(alpha, alpha + max(max(reflectionColor.r, reflectionColor.g), reflectionColor.b), fresnel) + mask;   //反射要写入alpha后面混合使用
                 finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + maskCol + bubbleCol;
-                return half4(finalColor, alpha);
+                return half4(finalColor, saturate(alpha));
             }
             ENDHLSL
         }
