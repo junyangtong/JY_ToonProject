@@ -13,7 +13,7 @@ public class LiquidLayerData : ScriptableObject
         public Texture2D maskTex;    // mask纹理
         [Range(0f, 1f)]
         public float lerpRange = 0.15f; // 渐变程度
-        [Range(0f, 1f)]
+        [Range(0f, 10f)]
         public float bubbleInt = 0f; // 气泡强度
     }
     public LiquidLayer data;

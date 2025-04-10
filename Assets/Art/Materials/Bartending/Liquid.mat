@@ -154,12 +154,12 @@ Material:
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
-    - _BubbleInParallax: 1.05
+    - _BubbleInParallax: 0.3
     - _BubbleInt: 1
-    - _BubbleOutParallax: 0.13
+    - _BubbleOutParallax: 0.05
     - _BubbleParallax: 0
     - _BubblePlxBias: 0.1
-    - _BubbleSpeed: -2.44
+    - _BubbleSpeed: -0.8
     - _BumpScale: 1
     - _ClearCoat: 0
     - _ClearCoatMask: 0
@@ -174,6 +174,7 @@ Material:
     - _DstBlendAlpha: 10
     - _EdgeWidth: 0.0475
     - _EnvironmentReflections: 1
+    - _FakePlaneUVTiling: 1
     - _FillLevel: 1
     - _FresnelPow: 5.12
     - _GlossMapScale: 1
@@ -184,7 +185,7 @@ Material:
     - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.6
+    - _LiquidHeight01: 0.4
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
@@ -200,7 +201,7 @@ Material:
     - _ReceiveShadows: 1
     - _ReflectionSource: 0
     - _RimInt: 0.5
-    - _ShallowRange: 0.13
+    - _ShallowRange: -0.09
     - _Shininess: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
@@ -212,7 +213,8 @@ Material:
     - _Transparency: 0.8
     - _Transparent: 1
     - _UVSec: 0
-    - _WaterLineWidth: 0.08
+    - _UVTiling: 1.78
+    - _WaterLineWidth: 0.04
     - _WaveAmplitude: 0
     - _WaveFrequency: 7.14
     - _WaveInt: 0.23

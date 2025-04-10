@@ -3043,7 +3043,7 @@ MonoBehaviour:
   layerLerps: []
   bubbleInt: []
   maskBlendCS: {fileID: 7200000, guid: ce59efa851f20ca4cae656d4f44add82, type: 3}
-  liquidPourDuration: 1
+  liquidPourDuration: 1.03
   liquidBlendDuration: 3
   heightCurve:
     serializedVersion: 2
@@ -3157,7 +3157,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.386417
     - serializedVersion: 3
-      time: 0.80104065
+      time: 0.61465454
       value: 0
       inSlope: 0
       outSlope: 0
@@ -3166,8 +3166,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.93580157
-      value: 0.035014875
+      time: 0.83842
+      value: 0.05460716
       inSlope: 0.7506808
       outSlope: 0.7506808
       tangentMode: 0
@@ -3175,8 +3175,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 1
     - serializedVersion: 3
-      time: 0.97255427
-      value: 0.107151136
+      time: 0.9455157
+      value: 0.23517238
       inSlope: 2.0103152
       outSlope: 2.0103152
       tangentMode: 0
@@ -3184,28 +3184,10 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 1
     - serializedVersion: 3
-      time: 0.98858285
-      value: 0.2502049
-      inSlope: 2.871414
-      outSlope: 2.871414
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.55670816
-      outWeight: 1
-    - serializedVersion: 3
-      time: 0.99519116
-      value: 0.38551283
-      inSlope: 5.690602
-      outSlope: 5.690602
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 1
-    - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 127.782745
-      outSlope: 127.782745
+      inSlope: 14.037576
+      outSlope: 14.037576
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -3268,7 +3250,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.79930794
+      time: 0.53459847
       value: 0
       inSlope: 0
       outSlope: 0

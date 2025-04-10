@@ -197,7 +197,7 @@ Material:
     - _QueueOffset: 1
     - _ReceiveShadows: 1
     - _ReflectionSource: 0
-    - _RefractIntensity: 0.2
+    - _RefractIntensity: 0.02
     - _RimInt: 0.5
     - _Shininess: 1
     - _Smoothness: 0
@@ -207,7 +207,7 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 1
-    - _Thinkness: 0.01
+    - _Thinkness: 0.07
     - _Transparency: 0.8
     - _Transparent: 1
     - _UVSec: 0

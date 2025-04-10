@@ -21,9 +21,11 @@ Shader "JY/Toon/Liquid"
         [Header(Front)]
         _WaterLineWidth ("WaterLineWidth", Float) = 1.0
         _RimInt ("RimInt", Float) = 1.0
+        _UVTiling ("UVTiling", Float) = 1.0
 
         [Header(Back)]
         _ShallowRange("Shallow Range", Float) = 1.0
+        _FakePlaneUVTiling ("Fake Plane UvTiling", Float) = 1.0
     }
     
     SubShader
@@ -49,6 +51,8 @@ Shader "JY/Toon/Liquid"
             half _WaterLineWidth;
             half _RimInt;
             half _ShallowRange;
+            half _UVTiling;
+            half _FakePlaneUVTiling;
         CBUFFER_END
 
         half4 _LiquidLayerColor[MAX_LAYER];
@@ -215,25 +219,28 @@ Shader "JY/Toon/Liquid"
                 half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, currentID)).r;
                 half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, nextID)).r;
                 half maskMixed = lerp(mask0, mask1, lerp01);
-
+                
                 // 混合颜色
                 half4 colorMixed = lerp(currentColor, nextColor, lerp01);
 
                 // 边缘光
                 half rimMask = _RimInt;
                 // 气泡
-                float2 bubbleUV1 = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleOutParallax);
+                float2 bubbleUV1 = ParallaxMappingUV(input.uv*_UVTiling, input.viewDirTS, _BubbleOutParallax);
                 bubbleUV1.y += _Time.x * _BubbleSpeed;
-                float2 bubbleUV2 = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleInParallax) * 0.5;
+                float2 bubbleUV2 = ParallaxMappingUV(input.uv*_UVTiling, input.viewDirTS, _BubbleInParallax);
                 half bubbleMask = lerp(_BubbleInt[currentID], _BubbleInt[nextID], lerp01);
                 half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV1).r;
                 half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r;
-                half bubbleCol = bubbleMask * (outBubble + innerBubble);
+                half3 bubbleCol = bubbleMask * (outBubble + innerBubble) * colorMixed.rgb;
 
-                half3 finalColor = colorMixed.rgb + maskMixed.rrr + bubbleCol;
+                // 遮罩颜色
+                half3 maskCol = maskMixed.r * colorMixed.rgb;
+
+                half3 finalColor = colorMixed.rgb + maskCol + bubbleCol;
                 // 吃水线
                 half waterlineMask = smoothstep(_WaterLineWidth, 0, clipPos);
-                finalColor = lerp(finalColor, finalColor*0.5, waterlineMask);//TODO:优化吃水线效果
+                finalColor = lerp(finalColor, finalColor * 0.8, waterlineMask);
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed;
                 return half4(finalColor, alpha);
@@ -307,13 +314,16 @@ Shader "JY/Toon/Liquid"
                 finalColor.rgb = lerp(finalColor.rgb, finalColor.rgb + 0.2, circleMask);//混合深浅颜色
 
                 // 气泡
-                float2 bubbleUV1 = ParallaxMappingUV(input.uv*10.0, input.viewDirTS, _BubbleOutParallax);
+                float2 bubbleUV1 = ParallaxMappingUV(input.uv*_UVTiling, input.viewDirTS, _BubbleOutParallax);
                 bubbleUV1.y += _Time.x * _BubbleSpeed;
-                float2 bubbleUV2 = intersectPosWS.xz;
+                float2 bubbleUV2 = intersectPosWS.xz * _FakePlaneUVTiling;
                 half bubbleMask = _BubbleInt[currentID];
                 half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV1).r * (1.0 - shallowFactor);  // 液面透出的上升气泡
                 half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r * circleMask;           // 液面上的静止气泡
-                half bubbleCol = bubbleMask * (outBubble + innerBubble);
+                half3 bubbleCol = bubbleMask * (outBubble + innerBubble) * finalColor;
+                
+                // 遮罩颜色
+                half3 maskCol = mask.r * finalColor;
                 
                 // 反射
                 half fresnel = normalize(input.viewDirWS).y;
@@ -321,7 +331,7 @@ Shader "JY/Toon/Liquid"
                 half4 reflectionColor = SAMPLE_TEXTURECUBE(_CubeMap, sampler_CubeMap, reflectionUV);
                 
                 alpha = lerp(alpha, alpha + max(max(reflectionColor.r, reflectionColor.g), reflectionColor.b), fresnel) + mask;   //反射要写入alpha后面混合使用
-                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + mask.rrr + bubbleCol;
+                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + maskCol + bubbleCol;
                 return half4(finalColor, alpha);
             }
             ENDHLSL
