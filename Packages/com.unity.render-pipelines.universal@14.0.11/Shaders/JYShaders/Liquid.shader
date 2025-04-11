@@ -203,6 +203,12 @@ Shader "JY/Toon/Liquid"
 
                 // 高度裁剪
                     // 扰动
+                    // 极坐标Test
+                    /* float2 origin = float2(originPosWS.x, originPosWS.z);
+                    float2 relativePos = relativePos.xz - origin;
+                    float r = length(relativePos);
+                    float theta = atan2(relativePos.y, relativePos.x);
+                    relativePos.xz = float2(r, theta); */
                     WaveInfo waveInfo = CalculateWave(relativePos);
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;

@@ -32,13 +32,16 @@ namespace JY.Toon.Bartending
         [SerializeField] private float liquidPourDuration = 1.0f;
         [SerializeField] private float liquidBlendDuration = 1.0f;
         [SerializeField] private AnimationCurve heightCurve;
-        [SerializeField] private AnimationCurve warpCurve;
         [SerializeField] private AnimationCurve lerpCurve;
+        [SerializeField] private AnimationCurve pourWarpCurve;
+        [SerializeField] private AnimationCurve pourUVCurve;
+
         [SerializeField] private AnimationCurve blendColorCurve;
         [SerializeField] private AnimationCurve blendBubbleCurve;
         [SerializeField] private AnimationCurve blendMaskCurve;
-        [SerializeField] private AnimationCurve pourUVCurve;
         [SerializeField] private AnimationCurve blendUVCurve;
+        [SerializeField] private AnimationCurve blendWarpCurve;
+
         [SerializeField] private Animation spoonAnim;
         [Header("Ice")]
         [SerializeField] private IceCount iceCount = IceCount.less;
@@ -66,6 +69,7 @@ namespace JY.Toon.Bartending
         private List<GameObject> iceObjPool;
         private int iceCountMax = 8;
         private Vector4 uvOffest = new Vector4(0f, 0f, 0f, 0f);
+        private Vector4 preUvOffest = new Vector4(0f, 0f, 0f, 0f);
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -354,7 +358,7 @@ namespace JY.Toon.Bartending
                         // 高度动画
                         liquidHeight01 = Mathf.Lerp(currentHeight, nextHeight, heightCurve.Evaluate(time));
                         // 波浪动画
-                        waveAmplitude = warpCurve.Evaluate(time);
+                        waveAmplitude = pourWarpCurve.Evaluate(time);
                         // 渐变动画
                         layerLerps[currentLayer] = Mathf.Lerp(0, lerpRangeTarget, lerpCurve.Evaluate(time));
                         // UV动画
@@ -423,9 +427,12 @@ namespace JY.Toon.Bartending
                         bubbleIntTarget[i] = Mathf.Lerp(bubbleInt[i], averageBubbleInt, blendBubbleCurve.Evaluate(time));
                         shaderNeedUpdate = true;
                     }
-                    // UV动画
-                    uvOffest.x = blendUVCurve.Evaluate(time);
-                    uvOffest.y = blendUVCurve.Evaluate(time);
+                    // 波浪动画
+                    waveAmplitude = blendWarpCurve.Evaluate(time);
+
+                    // UV动画 （在上次的uv偏移基础上累加）
+                    uvOffest.x = preUvOffest.x + blendUVCurve.Evaluate(time);
+                    uvOffest.y = preUvOffest.y + blendUVCurve.Evaluate(time);
                     
                     layerColors = layerColorTarget;
                     bubbleInt = bubbleIntTarget;
@@ -443,6 +450,7 @@ namespace JY.Toon.Bartending
             );
 
             await UniTask.WhenAll(blendMaskTask, blendTask);
+            preUvOffest = uvOffest; // 保存上次的uv偏移
             averageMask.Release();
         }
 #endregion

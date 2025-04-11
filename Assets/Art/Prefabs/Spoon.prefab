@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2757132283814198920}
   - component: {fileID: 7880760159928782413}
   - component: {fileID: 4374125695523226933}
+  - component: {fileID: 2446964907365157686}
   m_Layer: 0
   m_Name: Spoon
   m_TagString: Untagged
@@ -63,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 2f13dc7f28bb58141b38238a15a8a48d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -124,3 +125,26 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 18957688613028324, guid: 1e0cda1f91702b840a10504f69e9ab55, type: 3}
+--- !u!136 &2446964907365157686
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7094077418609457945}
+  m_Material: {fileID: 13400000, guid: fabe9a305bbeb464fb79df676bbfa6d2, type: 2}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.09
+  m_Height: 5.2468886
+  m_Direction: 1
+  m_Center: {x: 0.03, y: -0.18, z: -0}
