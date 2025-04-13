@@ -70,6 +70,7 @@ namespace JY.Toon.Bartending
         private int iceCountMax = 8;
         private Vector4 uvOffest = new Vector4(0f, 0f, 0f, 0f);
         private Vector4 preUvOffest = new Vector4(0f, 0f, 0f, 0f);
+        private float waveType = 1f;
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -282,6 +283,8 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_WaveFrequency", 1f);
                 liquidMaterial.SetFloat("_WaveSpeed", 1f);
                 liquidMaterial.SetTexture("_LiquidLayerMaskTex", layerMaskTexArray);
+                liquidMaterial.SetFloat("_WaveType", waveType);
+                
             }
         }
         /// <summary>
@@ -300,6 +303,7 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetFloat("_WaveFrequency", waveFrequency);
                 liquidMaterial.SetFloat("_WaveSpeed", waveSpeed);
                 liquidMaterial.SetVector("_UVOffest", uvOffest);
+                liquidMaterial.SetFloat("_WaveType", waveType);
             }
         }
 #region PourLiquid
@@ -318,6 +322,9 @@ namespace JY.Toon.Bartending
                 Debug.Log("正在播放动画，无法添加！");
                 return;
             }
+
+            // 切换波浪动画
+            waveType = 1f;
 
             //更新数组
             if (currentLayer < maxLayers - 1) // 防止CurrentColor和NextColor做插值时NextColor为默认颜色，每次填充上面两层
@@ -402,6 +409,10 @@ namespace JY.Toon.Bartending
             averageBubbleInt /= currentLayer;
             int count = blendCount == 4 ? blendCount : currentLayer; // 要改变上面两层颜色
             RenderTexture averageMask = BartendingAnimation.AverageMask(layerMaskTexArray, count);
+
+            // 切换波浪动画
+            waveType = 0f;
+            
             // 勺子动画
             if (spoonAnim != null)
             {
@@ -418,7 +429,7 @@ namespace JY.Toon.Bartending
                 {
                     Color[] layerColorTarget = layerColors;
                     float[] bubbleIntTarget = bubbleInt;
-
+                    
                     for (int i = 0; i <= count; i++)
                     {
                         // 混合颜色

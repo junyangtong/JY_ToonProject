@@ -29,7 +29,6 @@ Shader "JY/Toon/Liquid"
 
         [Header(Animation)]
         _UVOffest("UVOffest XY:Blend ZW:Pour", Vector) = (0.0, 0.0, 0.0, 0.0)
-
     }
     
     SubShader
@@ -43,6 +42,7 @@ Shader "JY/Toon/Liquid"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             
         #define MAX_LAYER 5
+        #define PI 3.1415926
 
         CBUFFER_START(UnityPerMaterial)
             half _MaxLiquidHeight;
@@ -67,6 +67,7 @@ Shader "JY/Toon/Liquid"
         half _WaveFrequency;
         half _WaveSpeed;
         half4 _UVOffest;
+        half _WaveType;
 
         TEXTURE2D(_BubbleTex);   SAMPLER(sampler_BubbleTex);
         TEXTURECUBE(_CubeMap);   SAMPLER(sampler_CubeMap);
@@ -140,9 +141,16 @@ Shader "JY/Toon/Liquid"
             WaveInfo waveInfo;
             float time = _Time.y * _WaveSpeed;
 
-            float waveHeight = _WaveAmplitude * 0.05 * sin(position.z * _WaveFrequency + time)
+            float waveHeight = 0.0;
+            if (_WaveType > 0.5)
+            {
+                waveHeight = _WaveAmplitude * 0.05 * sin(position.z * _WaveFrequency + time)
                              + _WaveAmplitude * 0.05 * sin(position.x * _WaveFrequency + time);
-
+            }
+            else
+            {
+                waveHeight = _WaveAmplitude * 0.05 * sin(position.x * PI * 3.0  + time);
+            }                
 
             float3 T = float3
             (
@@ -172,6 +180,16 @@ Shader "JY/Toon/Liquid"
         float3 GetReflectionUV(float3 normalWS, float3 viewDirWS)
         {
             return  reflect(viewDirWS, normalWS);
+        }
+
+        //极坐标
+        float2 Polar(float2 uv)
+        {
+            float distance=length(uv);
+            distance *=2;
+            float angle=atan2(uv.x,uv.y);
+            float angle01=angle/3.14159/2+0.5;
+            return float2(angle01*4.0,distance);
         }
         
         ENDHLSL
@@ -203,12 +221,10 @@ Shader "JY/Toon/Liquid"
 
                 // 高度裁剪
                     // 扰动
-                    // 极坐标Test
-                    /* float2 origin = float2(originPosWS.x, originPosWS.z);
-                    float2 relativePos = relativePos.xz - origin;
-                    float r = length(relativePos);
-                    float theta = atan2(relativePos.y, relativePos.x);
-                    relativePos.xz = float2(r, theta); */
+                    if (_WaveType < 0.5)
+                    {
+                        relativePos.xz = Polar(relativePos.xz);// 极坐标
+                    }
                     WaveInfo waveInfo = CalculateWave(relativePos);
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
@@ -292,6 +308,10 @@ Shader "JY/Toon/Liquid"
 
                 // 高度裁剪
                     // 扰动
+                    if (_WaveType < 0.5)
+                    {
+                        relativePos.xz = Polar(relativePos.xz);// 极坐标
+                    }
                     WaveInfo waveInfo = CalculateWave(relativePos);
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
@@ -383,6 +403,10 @@ Shader "JY/Toon/Liquid"
 
                 // 高度裁剪
                     // 扰动
+                    if (_WaveType < 0.5)
+                    {
+                        relativePos.xz = Polar(relativePos.xz);// 极坐标
+                    }
                     WaveInfo waveInfo = CalculateWave(relativePos);
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
