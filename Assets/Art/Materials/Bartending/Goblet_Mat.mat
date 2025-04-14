@@ -24,7 +24,10 @@ Material:
   m_Shader: {fileID: 4800000, guid: 46f84970e701a924fb0bc5c6019a488c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _METALLICSPECGLOSSMAP
+  - _NORMALMAP
+  - _OCCLUSIONMAP
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -46,7 +49,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 70808545148644f4287cdc6972bfdcd6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ClearCoatMap:
@@ -106,7 +109,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 5643401b7ae743e449f50147b14b35aa, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicSpecGlossMap:
@@ -118,7 +121,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: c8a354d0c0dd9e146b170e2c4fd2b5ee, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -166,6 +169,7 @@ Material:
     - _EdgeWidth: 0.0475
     - _EnvironmentReflections: 1
     - _FillLevel: 1
+    - _FresnelIntensity: 1
     - _FresnelPow: 5.12
     - _Glass: 0
     - _GlossMapScale: 1
@@ -194,7 +198,7 @@ Material:
     - _RefractIntensity: 0.05
     - _RimInt: 0.5
     - _Shininess: 1
-    - _Smoothness: 0.297
+    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
     - _SpecularHighlights: 1

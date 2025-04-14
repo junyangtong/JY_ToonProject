@@ -277,7 +277,7 @@ Shader "JY/Toon/Liquid"
                 finalColor = lerp(finalColor, finalColor * 0.8, waterlineMask);
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed;
-                return half4(finalColor, saturate(alpha));
+                return waterlineMask;//half4(finalColor, saturate(alpha));
             }
             ENDHLSL
         }
