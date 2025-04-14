@@ -185,7 +185,7 @@ Material:
     - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0
+    - _LiquidHeight01: 0.2
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
@@ -214,11 +214,11 @@ Material:
     - _Transparent: 1
     - _UVSec: 0
     - _UVTiling: 1.78
-    - _WaterLineWidth: 0.04
+    - _WaterLineWidth: 0.02
     - _WaveAmplitude: 0
-    - _WaveFrequency: 1
+    - _WaveFrequency: 7.14
     - _WaveInt: 0.23
-    - _WaveSpeed: 1
+    - _WaveSpeed: 10
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:

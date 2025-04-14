@@ -40,6 +40,7 @@ Shader "JY/Toon/Liquid"
         }
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
             
         #define MAX_LAYER 5
         #define PI 3.1415926
@@ -273,11 +274,14 @@ Shader "JY/Toon/Liquid"
 
                 half3 finalColor = colorMixed.rgb + maskCol + bubbleCol;
                 // 吃水线
-                half waterlineMask = smoothstep(_WaterLineWidth, 0, clipPos);
-                finalColor = lerp(finalColor, finalColor * 0.8, waterlineMask);
+                half waterlineMask = min(smoothstep(0.05, 0, clipPos), smoothstep(0, _WaterLineWidth, clipPos));
+                float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
+                float2 refractionUV = screenUV + waterlineMask * 0.5;
+                half3 waterlineCol = SampleSceneColor(refractionUV) * waterlineMask; // 折射
+                finalColor = lerp(finalColor, waterlineCol, waterlineMask) + waterlineCol;
                 
-                half alpha = _Transparent * colorMixed.a + maskMixed;
-                return waterlineMask;//half4(finalColor, saturate(alpha));
+                half alpha = _Transparent * colorMixed.a + maskMixed + waterlineMask;
+                return half4(finalColor, saturate(alpha));
             }
             ENDHLSL
         }
