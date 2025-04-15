@@ -245,13 +245,14 @@ Shader "JY/Toon/Liquid"
                 half lerpNoise = SAMPLE_TEXTURE2D(_LerpNoise, sampler_LerpNoise, input.uv).r;
                 lerp01 = lerp01 + (lerpNoise - 0.5) * _LayerWarpInt * layerWarpMask;
 
-                // 边缘遮罩
-                half rimMask = pow(saturate(dot(input.normalWS, normalize(input.viewDirWS))), _RimInt);
+                // 边缘遮罩（侧边和上边）
+                half rimMask = min(pow(saturate(dot(input.normalWS, normalize(input.viewDirWS))), _RimInt)
+                                , smoothstep(0.03, 0.1, clipPos));
 
                 // UV动画
                 input.uv += _UVOffest.xy;
                 input.uv += _UVOffest.zw * rimMask;
-
+                
                 // 遮罩
                 half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, currentID)).r;
                 half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, nextID)).r;
@@ -274,11 +275,12 @@ Shader "JY/Toon/Liquid"
 
                 half3 finalColor = colorMixed.rgb + maskCol + bubbleCol;
                 // 吃水线
-                half waterlineMask = min(smoothstep(0.05, 0, clipPos), smoothstep(0, _WaterLineWidth, clipPos));
+                //half waterlineMask = smoothstep(_WaterLineWidth, _WaterLineWidth-0.03, clipPos);
+                half waterlineMask = min(smoothstep(0.1, 0.02, clipPos), smoothstep(0, _WaterLineWidth, clipPos));
                 float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
                 float2 refractionUV = screenUV + waterlineMask * 0.5;
                 half3 waterlineCol = SampleSceneColor(refractionUV) * waterlineMask; // 折射
-                finalColor = lerp(finalColor, waterlineCol, waterlineMask) + waterlineCol;
+                finalColor = finalColor * (1.0 - waterlineMask) + waterlineCol + finalColor * waterlineMask*0.2;
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed + waterlineMask;
                 return half4(finalColor, saturate(alpha));
