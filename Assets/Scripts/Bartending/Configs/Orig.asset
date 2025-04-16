@@ -18,3 +18,4 @@ MonoBehaviour:
     maskTex: {fileID: 2800000, guid: 11004275970a28048b61f4e07f880a31, type: 3}
     lerpRange: 0.3
     bubbleInt: 0
+    lerpWarpInt: 1

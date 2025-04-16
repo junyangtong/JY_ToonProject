@@ -22,6 +22,7 @@ Shader "JY/Toon/Liquid"
         _WaterLineWidth ("WaterLineWidth", Float) = 1.0
         _RimInt ("RimInt", Float) = 1.0
         _UVTiling ("UVTiling", Float) = 1.0
+        _WaterLineSmoothness ("WaterLineSmoothness", Float) = 1.0
 
         [Header(Back)]
         _ShallowRange("Shallow Range", Float) = 1.0
@@ -41,6 +42,7 @@ Shader "JY/Toon/Liquid"
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             
         #define MAX_LAYER 5
         #define PI 3.1415926
@@ -58,11 +60,14 @@ Shader "JY/Toon/Liquid"
             half _ShallowRange;
             half _UVTiling;
             half _FakePlaneUVTiling;
+            half _WaterLineSmoothness;
         CBUFFER_END
 
+        half _MaxLayers;
         half4 _LiquidLayerColor[MAX_LAYER];
         half _LiquidLayerLerpRange[MAX_LAYER];
         half _BubbleInt[MAX_LAYER];
+        half _LerpWarpInt[MAX_LAYER];
         half _LiquidHeight01;
         half _WaveAmplitude;
         half _WaveFrequency;
@@ -228,18 +233,19 @@ Shader "JY/Toon/Liquid"
                 clip(clipPos);
                 
                 // 获取每层液体的id
-                float liquidHeight0Max = relativePos.y / _MaxLiquidHeight * MAX_LAYER;
+                float liquidHeight0Max = relativePos.y / _MaxLiquidHeight * _MaxLayers;
                 uint currentID = floor(liquidHeight0Max - 0.5);
-                int nextID = min(MAX_LAYER - 1, currentID + 1);
+                int nextID = min(_MaxLayers - 1, currentID + 1);
                 
                 // 计算混合范围
                 half4 currentColor = _LiquidLayerColor[currentID];
                 half4 nextColor = _LiquidLayerColor[nextID];
-                half lerpRange = _LiquidLayerLerpRange[min(MAX_LAYER - 1, currentID+1)];
+                half lerpRange = _LiquidLayerLerpRange[nextID];
                 half lerp01 = smoothstep(nextID - lerpRange, nextID + lerpRange, liquidHeight0Max);
+                half lerpWarpInt = _LerpWarpInt[nextID];
                 half layerWarpMask = 1.0 - abs(lerp01 - 0.5) * 2.0;
                 half lerpNoise = SAMPLE_TEXTURE2D(_LerpNoise, sampler_LerpNoise, input.uv).r;
-                lerp01 = lerp01 + (lerpNoise - 0.5) * _LayerWarpInt * layerWarpMask;
+                lerp01 = lerp01 + (lerpNoise - 0.5) * lerpWarpInt * layerWarpMask;
 
                 // 边缘遮罩（侧边和上边）
                 half rimMask = min(pow(saturate(dot(input.normalWS, normalize(input.viewDirWS))), _RimInt)
@@ -270,16 +276,21 @@ Shader "JY/Toon/Liquid"
                 half3 maskCol = maskMixed.r * colorMixed.rgb * rimMask;
 
                 half3 finalColor = colorMixed.rgb + maskCol + bubbleCol;
+
                 // 吃水线
-                //half waterlineMask = smoothstep(_WaterLineWidth, _WaterLineWidth-0.03, clipPos);
-                half waterlineMask = min(smoothstep(0.1, 0.02, clipPos), smoothstep(0, _WaterLineWidth, clipPos));
-                float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
-                float2 refractionUV = screenUV + waterlineMask * 0.5;
-                half3 waterlineCol = SampleSceneColor(refractionUV) * waterlineMask; // 折射
-                finalColor = finalColor * (1.0 - waterlineMask) + waterlineCol + finalColor * waterlineMask*0.2;
+                    // 折射
+                    half waterlineMask = min(smoothstep(0.1, 0.02, clipPos), smoothstep(0, _WaterLineWidth, clipPos));
+                    float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
+                    float2 refractionUV = screenUV + waterlineMask * 0.5;
+                    half3 waterlineCol = SampleSceneColor(refractionUV) * waterlineMask; 
+                    finalColor = finalColor * (1.0 - waterlineMask) + waterlineCol + finalColor * waterlineMask * 0.5;
+                    // 反射
+                    float3 reflectVector = reflect(-input.viewDirWS, input.normalWS);
+                    half4 reflectColor = half4(SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflectVector, 6.0 - _WaterLineSmoothness*6.0));
+                    finalColor = finalColor + reflectColor.rgb * waterlineMask;
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed + waterlineMask;
-                return half4(finalColor, saturate(alpha));
+                return half4(finalColor, 1.0);//saturate(alpha));
             }
             ENDHLSL
         }
@@ -315,9 +326,9 @@ Shader "JY/Toon/Liquid"
                 clip(clipPos);
                 
                 // 获取每层液体的id
-                float liquidHeight0Max = relativePos.y / _MaxLiquidHeight * MAX_LAYER;
+                float liquidHeight0Max = relativePos.y / _MaxLiquidHeight * _MaxLayers;
                 uint currentID = floor(liquidHeight0Max - 0.5);
-                int nextID = min(MAX_LAYER - 1, currentID + 1);
+                int nextID = min(_MaxLayers - 1, currentID + 1);
 
                 //虚拟液面
                 // n * (intersectPos - liquidHeightWS) = 0
@@ -330,7 +341,7 @@ Shader "JY/Toon/Liquid"
                 depthOUT = EyeDepthToLinear01(dot(planeViewDirWS, -UNITY_MATRIX_V[2].xyz));
                 
                 // 取当前最高层ID
-                uint currentIDMax = min(MAX_LAYER - 1, floor(_LiquidHeight01 * MAX_LAYER)); 
+                uint currentIDMax = min(_MaxLayers - 1, floor(_LiquidHeight01 * _MaxLayers)); 
                 // 静态遮罩
                 half mask = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(intersectPosWS.xz, currentIDMax)).r;// 取当前最高层遮罩
 

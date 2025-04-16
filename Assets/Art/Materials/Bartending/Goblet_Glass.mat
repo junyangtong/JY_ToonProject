@@ -107,7 +107,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MatCapTex:
-        m_Texture: {fileID: 2800000, guid: d3b156dea0ad90a418bbda2ce0c636bf, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3207ffa2129479f489d48e81b77cb351, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -171,7 +171,7 @@ Material:
     - _EdgeWidth: 0.0475
     - _EnvironmentReflections: 1
     - _FillLevel: 1
-    - _FresnelIntensity: 0.77
+    - _FresnelIntensity: 0.4
     - _FresnelPow: 5.12
     - _Glass: 1
     - _GlossMapScale: 1
@@ -200,7 +200,7 @@ Material:
     - _RefractIntensity: 0.06
     - _RimInt: 0.5
     - _Shininess: 1
-    - _Smoothness: 0
+    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
     - _SpecularHighlights: 1

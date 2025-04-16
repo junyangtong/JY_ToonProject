@@ -18,3 +18,4 @@ MonoBehaviour:
     maskTex: {fileID: 0}
     lerpRange: 0.3
     bubbleInt: 6.14
+    lerpWarpInt: 0.375

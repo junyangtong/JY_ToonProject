@@ -26,6 +26,7 @@ namespace JY.Toon.Bartending
         [SerializeField] private Color[] layerColors;
         [SerializeField] private float[] layerLerps;
         [SerializeField] private float[] bubbleInt;
+        [SerializeField] private float[] lerpWarpInt;
         [SerializeField] private ComputeShader maskBlendCS;
 
         [Header("Animation")]
@@ -33,6 +34,7 @@ namespace JY.Toon.Bartending
         [SerializeField] private float liquidBlendDuration = 1.0f;
         [SerializeField] private AnimationCurve heightCurve;
         [SerializeField] private AnimationCurve lerpCurve;
+        [SerializeField] private AnimationCurve lerpWarpCurve;
         [SerializeField] private AnimationCurve pourWarpCurve;
         [SerializeField] private AnimationCurve pourUVCurve;
 
@@ -109,6 +111,7 @@ namespace JY.Toon.Bartending
             layerColors = new Color[maxLayers];
             layerLerps = new float[maxLayers];
             bubbleInt = new float[maxLayers];
+            lerpWarpInt = new float[maxLayers];
 
             ResetMaskTexArray(maxLayers);
 
@@ -281,6 +284,7 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetColorArray("_LiquidLayerColor", layerColors);
                 liquidMaterial.SetFloatArray("_LiquidLayerLerpRange", layerLerps);
                 liquidMaterial.SetFloatArray("_BubbleInt", bubbleInt);
+                liquidMaterial.SetFloatArray("_LerpWarpInt", lerpWarpInt);
                 liquidMaterial.SetFloat("_WaveAmplitude", 0f);
                 liquidMaterial.SetFloat("_WaveFrequency", 1f);
                 liquidMaterial.SetFloat("_WaveSpeed", 1f);
@@ -300,6 +304,7 @@ namespace JY.Toon.Bartending
                 liquidMaterial.SetColorArray("_LiquidLayerColor", layerColors);
                 liquidMaterial.SetFloatArray("_LiquidLayerLerpRange", layerLerps);
                 liquidMaterial.SetFloatArray("_BubbleInt", bubbleInt);
+                liquidMaterial.SetFloatArray("_LerpWarpInt", lerpWarpInt);
                 liquidMaterial.SetTexture("_LiquidLayerMaskTex", layerMaskTexArray);
                 liquidMaterial.SetFloat("_WaveAmplitude", waveAmplitude);
                 liquidMaterial.SetFloat("_WaveFrequency", waveFrequency);
@@ -342,6 +347,7 @@ namespace JY.Toon.Bartending
             }
             
             float lerpRangeTarget = liquidLayerData.data.lerpRange;
+            float lerpWarpIntTarget = liquidLayerData.data.lerpWarpInt;
             bubbleInt[currentLayer] = liquidLayerData.data.bubbleInt;
 
             // 计算当前层高度和下一层高度
@@ -359,6 +365,8 @@ namespace JY.Toon.Bartending
                         waveAmplitude = pourWarpCurve.Evaluate(time);
                         // 渐变动画
                         layerLerps[currentLayer] = Mathf.Lerp(0, lerpRangeTarget, lerpCurve.Evaluate(time));
+                        // 渐变过渡扰动动画
+                        lerpWarpInt[currentLayer] = Mathf.Lerp(0, lerpWarpIntTarget, lerpWarpCurve.Evaluate(time));
                         // UV动画
                         uvOffest.w = pourUVCurve.Evaluate(time);
                         // 延迟更新颜色数组
@@ -444,7 +452,7 @@ namespace JY.Toon.Bartending
                 {
                     Color[] layerColorTarget = layerColors;
                     float[] bubbleIntTarget = bubbleInt;
-                    
+                    float[] lerpWarpIntTarget = lerpWarpInt;
                     for (int i = 0; i <= count; i++)
                     {
                         // 混合颜色
@@ -617,7 +625,8 @@ namespace JY.Toon.Bartending
                 GUI.Label(new Rect(padding + size*2 + padding*2, y, 200, 60), 
                     $"Color: R{layerColors[i].r:F2} G{layerColors[i].g:F2} B{layerColors[i].b:F2}\n" +
                     $"Lerp: {layerLerps[i]:F2}\n" +
-                    $"BubbleInt: {bubbleInt[i]:F2}");
+                    $"BubbleInt: {bubbleInt[i]:F2}\n" + 
+                    $"LerpWarpInt: {lerpWarpInt[i]:F2}");
             }
         }
 
