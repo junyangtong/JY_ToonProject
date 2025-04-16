@@ -52,18 +52,19 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     float2 refractionUV = screenUV + distortion * _RefractIntensity * thickness;
     half3 sceneColor = SAMPLE_TEXTURE2D(_LiquidFinalTexture, sampler_LiquidFinalTexture, refractionUV).rgb;
     half3 refractionColor = surfaceData.albedo * sceneColor;
-    surfaceData.albedo = refractionColor;
-
+   
     // 反射
     float3 reflectVector = reflect(-inputData.viewDirectionWS, inputData.normalWS);
     half4 encodedEnv = half4(SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflectVector, 6.0 - _Smoothness*6.0));
     half3 reflectColor = DecodeHDREnvironment(encodedEnv, unity_SpecCube0_HDR);
 
+    surfaceData.albedo = lerp(refractionColor, reflectColor, fresnel);
+
     float2 matcapUV = GetMatcapUV(inputData.normalWS);
     half4 matcapColor = SAMPLE_TEXTURE2D(_MatCapTex, sampler_MatCapTex, matcapUV);
     
     // Blend主光光照
-    lightingData.mainLightColor = surfaceData.albedo + matcapColor.rgb + reflectColor;
+    lightingData.mainLightColor = surfaceData.albedo + matcapColor.rgb;
     lightingData.mainLightColor *= mainLight.shadowAttenuation;
     
     // 计算最终颜色
@@ -74,7 +75,7 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     finalColor = CalculateFinalColor(lightingData, surfaceData.alpha);
     #endif
     
-    finalColor.rgb = lerp(surfaceData.albedo, finalColor.rgb, fresnel);
+    //finalColor.rgb = lerp(surfaceData.albedo, finalColor.rgb, fresnel);
     
     finalColor.a = surfaceData.alpha;
     

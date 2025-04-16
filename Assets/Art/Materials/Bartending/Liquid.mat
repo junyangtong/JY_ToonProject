@@ -45,7 +45,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BubbleTex:
-        m_Texture: {fileID: 2800000, guid: a2cf25c4482d2484badc71691e268161, type: 3}
+        m_Texture: {fileID: 2800000, guid: 672004e9f4913be4282f7ec89fc4ce3f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -185,7 +185,7 @@ Material:
     - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.6
+    - _LiquidHeight01: 0.2
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
