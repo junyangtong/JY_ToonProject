@@ -22,6 +22,7 @@ namespace JY.Toon.Bartending
         private float waveAmplitude;
         private float waveFrequency;
         private float waveSpeed;
+        private int waveType;
         private Renderer liquidRenderer;
         private BartendingManager bartendingManager;
         
@@ -33,9 +34,19 @@ namespace JY.Toon.Bartending
             waveFrequency = bartendingManager.WaveFrequency;
             waveSpeed = bartendingManager.WaveSpeed;
             waveAmplitude = bartendingManager.WaveAmplitude;
+            waveType = bartendingManager.WaveType;
             liquidRenderer = bartendingManager.LiquidRenderer;
-
             liquidObjectPosWS = liquidRenderer.transform.position;
+        }
+                
+        //极坐标
+        Vector2 Polar(Vector2 uv)
+        {
+            float distance = Vector2.Distance(uv, Vector2.zero);
+            distance *= 2.0f;
+            float angle = Mathf.Atan2(uv.x,uv.y);
+            float angle01 = angle / Mathf.PI * 0.5f + 0.5f;
+            return new Vector2(angle01 * 4.0f, distance);
         }
 
         // 计算波浪 和shader中一致
@@ -50,8 +61,19 @@ namespace JY.Toon.Bartending
 
             float time = Time.time * waveSpeed;
 
-            float waveHeight = waveAmplitude * 0.05f * Mathf.Sin(position.x * waveFrequency + time) 
-                             * waveAmplitude * 0.05f * Mathf.Sin(position.z * waveFrequency + time);
+            float waveHeight = 0f;
+            if (waveType == 0)
+            {
+                waveHeight = waveAmplitude * 0.05f * Mathf.Sin(position.x * waveFrequency + time) 
+                            * waveAmplitude * 0.05f * Mathf.Sin(position.z * waveFrequency + time);
+            }
+            else
+            {
+                Vector2 polar = Polar(new Vector2(position.x, position.z));// 极坐标
+                position.x = polar.x;
+                position.z = polar.y;
+                waveHeight = waveAmplitude * 0.05f * Mathf.Sin(position.x * Mathf.PI * 3.0f + time);
+            }
             waveInfo.height = waveHeight;
 
             Vector3 T = new Vector3

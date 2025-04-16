@@ -86,17 +86,7 @@ namespace JY.Toon.Bartending
                     tempCamColorHandle.rtHandleProperties.rtHandleScale.y
                 ) : Vector2.one;
 
-            // Pass1 copy场景
-            using (new ProfilingScope(cmd, profilingSampler_Scene))
-            {
-                CoreUtils.SetRenderTarget(cmd, handle_SceneColor, handle_SceneDepth, ClearFlag.None);
-                Blitter.BlitColorAndDepth(cmd, sRdr_Camera.cameraColorTargetHandle, sRdr_Camera.cameraDepthTargetHandle, 
-                    viewportScale, 0, true);
-            }
-            mergeMat.SetTexture(id_SceneColorBuffer, handle_SceneColor);
-            mergeMat.SetTexture(id_SceneDepthBuffer, handle_SceneDepth);
-
-            // Pass2 液体Back
+            // Pass1 液体Back
             using (new ProfilingScope(cmd, profilingSampler_Liquid))
             {
                 CoreUtils.SetRenderTarget(cmd, handle_BackLiquidColor, handle_BackLiquidDepth, ClearFlag.All);
@@ -107,7 +97,7 @@ namespace JY.Toon.Bartending
             mergeMat.SetTexture(id_BackLiquidColorBuffer, handle_BackLiquidColor);
             mergeMat.SetTexture(id_BackLiquidDepthBuffer, handle_BackLiquidDepth);
             
-            // Pass3 冰块 gpuinstance
+            // Pass2 冰块 gpuinstance
             using (new ProfilingScope(cmd, profilingSampler_Ice))
             {
                 if (iceMatrix != null && iceMatrix.Length > 0)
@@ -118,7 +108,7 @@ namespace JY.Toon.Bartending
             }
             mergeMat.SetTexture(id_IceColorBuffer, handle_IceColor);
 
-            // Pass4 液体Front
+            // Pass3 液体Front
             using (new ProfilingScope(cmd, profilingSampler_Liquid))
             {
                 CoreUtils.SetRenderTarget(cmd, handle_FrontLiquidColor, handle_FrontLiquidDepth, ClearFlag.All);
@@ -127,14 +117,14 @@ namespace JY.Toon.Bartending
             mergeMat.SetTexture(id_FrontLiquidColorBuffer, handle_FrontLiquidColor);
             mergeMat.SetTexture(id_FrontLiquidDepthBuffer, handle_FrontLiquidDepth);
 
-            // Pass5 混合
+            // Pass4 混合
             using (new ProfilingScope(cmd, profilingSampler_Merge))
             {
                 CoreUtils.SetRenderTarget(cmd, sRdr_Camera.cameraColorTargetHandle, sRdr_Camera.cameraDepthTargetHandle, ClearFlag.None);
                 cmd.DrawProcedural(Matrix4x4.identity, mergeMat, 0, MeshTopology.Triangles, 3, 1);
             }
 
-            // Pass6 copy场景给杯子做折射
+            // Pass5 copy场景给杯子做折射
             using (new ProfilingScope(cmd, profilingSampler_Scene))
             {
                 Blitter.BlitCameraTexture(cmd, sRdr_Camera.cameraColorTargetHandle, handle_SceneColor, 0, false);

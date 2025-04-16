@@ -130,6 +130,16 @@ Shader "JY/Toon/Liquid"
             return (rcp(eyeDepth) - _ZBufferParams.w) / _ZBufferParams.z;
         }
 
+        //极坐标
+        float2 Polar(float2 uv)
+        {
+            float distance = length(uv);
+            distance *= 2.0f;
+            float angle = atan2(uv.x,uv.y);
+            float angle01 = angle / PI * 0.5f + 0.5f;
+            return float2(angle01 * 4.0f, distance);
+        }
+
         //计算波形
         struct WaveInfo
         {
@@ -150,6 +160,7 @@ Shader "JY/Toon/Liquid"
             }
             else
             {
+                position.xz = Polar(position.xz);// 极坐标
                 waveHeight = _WaveAmplitude * 0.05 * sin(position.x * PI * 3.0  + time);
             }                
 
@@ -182,16 +193,6 @@ Shader "JY/Toon/Liquid"
         {
             return  reflect(viewDirWS, normalWS);
         }
-
-        //极坐标
-        float2 Polar(float2 uv)
-        {
-            float distance=length(uv);
-            distance *=2;
-            float angle=atan2(uv.x,uv.y);
-            float angle01=angle/3.14159/2+0.5;
-            return float2(angle01*4.0,distance);
-        }
         
         ENDHLSL
 
@@ -221,11 +222,6 @@ Shader "JY/Toon/Liquid"
                 float3 relativePos = input.positionWS.xyz - originPosWS;
 
                 // 高度裁剪
-                    // 扰动
-                    if (_WaveType < 0.5)
-                    {
-                        relativePos.xz = Polar(relativePos.xz);// 极坐标
-                    }
                     WaveInfo waveInfo = CalculateWave(relativePos);
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
@@ -313,11 +309,6 @@ Shader "JY/Toon/Liquid"
                 float3 relativePos = input.positionWS.xyz - originPosWS;
 
                 // 高度裁剪
-                    // 扰动
-                    if (_WaveType < 0.5)
-                    {
-                        relativePos.xz = Polar(relativePos.xz);// 极坐标
-                    }
                     WaveInfo waveInfo = CalculateWave(relativePos);
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
@@ -409,10 +400,6 @@ Shader "JY/Toon/Liquid"
 
                 // 高度裁剪
                     // 扰动
-                    if (_WaveType < 0.5)
-                    {
-                        relativePos.xz = Polar(relativePos.xz);// 极坐标
-                    }
                     WaveInfo waveInfo = CalculateWave(relativePos);
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
