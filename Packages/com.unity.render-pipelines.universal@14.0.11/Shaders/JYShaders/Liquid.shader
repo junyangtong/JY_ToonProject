@@ -281,7 +281,7 @@ Shader "JY/Toon/Liquid"
                     // 折射
                     half waterlineMask = min(smoothstep(0.1, 0.02, clipPos), smoothstep(0, _WaterLineWidth, clipPos));
                     float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
-                    float2 refractionUV = screenUV + waterlineMask * 0.5;
+                    float2 refractionUV = screenUV + waterlineMask * 0.3;
                     half3 waterlineCol = SampleSceneColor(refractionUV) * waterlineMask; 
                     finalColor = finalColor * (1.0 - waterlineMask) + waterlineCol + finalColor * waterlineMask * 0.5;
                     // 反射
@@ -290,7 +290,7 @@ Shader "JY/Toon/Liquid"
                     finalColor = finalColor + reflectColor.rgb * waterlineMask;
                 
                 half alpha = _Transparent * colorMixed.a + maskMixed + waterlineMask;
-                return half4(finalColor, 1.0);//saturate(alpha));
+                return half4(finalColor, saturate(alpha));
             }
             ENDHLSL
         }
