@@ -152,7 +152,7 @@ Shader "JY/Toon/Liquid"
             float3 normal;
         };
         
-        WaveInfo CalculateWave (float3 position)
+        WaveInfo CalculateWave(float3 position)
         {
             WaveInfo waveInfo;
             float time = _Time.y * _WaveSpeed;
@@ -249,13 +249,13 @@ Shader "JY/Toon/Liquid"
 
                 // 边缘遮罩（侧边和上边）
                 half rimMask = min(pow(saturate(dot(input.normalWS, normalize(input.viewDirWS))), _RimInt)
-                                , smoothstep(0.03, 0.1, clipPos));
+                                , smoothstep(0.03, 0.2, clipPos));
 
                 // UV动画
                 input.uv += _UVOffest.xy;
-                input.uv += _UVOffest.zw * rimMask;
+                input.uv += _UVOffest.zw;
                 
-                // 遮罩
+                // 液体纹理
                 half mask0 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, currentID)).r;
                 half mask1 = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(input.uv*10.0, nextID)).r;
                 half maskMixed = lerp(mask0, mask1, lerp01);
@@ -272,7 +272,7 @@ Shader "JY/Toon/Liquid"
                 half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r;
                 half3 bubbleCol = bubbleMask * (outBubble + innerBubble) * colorMixed.rgb * rimMask;
 
-                // 遮罩颜色
+                // 液体纹理颜色
                 half3 maskCol = maskMixed.r * colorMixed.rgb * rimMask;
 
                 half3 finalColor = colorMixed.rgb + maskCol + bubbleCol;
@@ -333,8 +333,8 @@ Shader "JY/Toon/Liquid"
                 //虚拟液面
                 // n * (intersectPos - liquidHeightWS) = 0
                 // intersectPos = input.positionWS + t * input.viewDirWS
-                half3 liquidHeightWS = float3(0, originPosWS.y + liquidHeightOS, 0);
-                half3 n = float3(0,1,0);
+                half3 liquidHeightWS = float3(input.positionWS.x, originPosWS.y + liquidHeightOS, input.positionWS.z);
+                half3 n = waveInfo.normal;
                 float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, liquidHeightWS - input.positionWS) / dot(n, input.viewDirWS);
                 // 虚拟平面深度覆盖深度缓冲
                 float3 planeViewDirWS = intersectPosWS - GetCameraPositionWS();
@@ -342,8 +342,8 @@ Shader "JY/Toon/Liquid"
                 
                 // 取当前最高层ID
                 uint currentIDMax = min(_MaxLayers - 1, floor(_LiquidHeight01 * _MaxLayers)); 
-                // 静态遮罩
-                half mask = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(intersectPosWS.xz, currentIDMax)).r;// 取当前最高层遮罩
+                // 取当前最高层液体纹理
+                half mask = _LiquidLayerMaskTex.Sample(sampler_LiquidLayerMaskTex, float3(intersectPosWS.xz, currentIDMax)).r;
 
                 // 深浅水变化
                 half shallowFactor = smoothstep(_ShallowRange, _ShallowRange + 0.3, clipPos);
@@ -368,7 +368,7 @@ Shader "JY/Toon/Liquid"
                 half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r * circleMask;           // 液面上的静止气泡
                 half3 bubbleCol = bubbleMask * (outBubble + innerBubble) * finalColor;
                 
-                // 遮罩颜色
+                // 液体纹理颜色
                 half3 maskCol = mask.r * finalColor;
                 
                 // 反射
