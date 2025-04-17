@@ -17,12 +17,15 @@ namespace JY.Toon.Bartending
         [SerializeField] private List<LiquidLayerData> liquidLayerDataList;
         
         [Header("Liquid Setting")]
+        [SerializeField] private int maxLayers = 5; // 修改需要重新运行
+        [SerializeField] private float maxLiquidHeight = 1.0f; // 修改需要重新运行
         [SerializeField] private Renderer liquidRenderer;
-        [SerializeField] private float maxLiquidHeight = 1.0f;
         [SerializeField] private Color defaultLiquidColor = new Color(0.5f, 0.3f, 0.1f, 0.8f);
+        [Header("Wave")]
         [SerializeField] private float waveAmplitude = 0.3f;
         [SerializeField] private float waveFrequency = 3.0f;
         [SerializeField] private float waveSpeed = 1.0f;
+        [Header("Preview")]
         [SerializeField] private Color[] layerColors;
         [SerializeField] private float[] layerLerps;
         [SerializeField] private float[] bubbleInt;
@@ -59,7 +62,6 @@ namespace JY.Toon.Bartending
         [SerializeField] private Dropdown iceCountDropdown; 
         
         private LiquidLayerData liquidLayerData;
-        private int maxLayers = 5;
         private Material liquidMaterial;
         private float liquidHeight01 = 0f;
         private int currentLayer = 0;
@@ -369,7 +371,7 @@ namespace JY.Toon.Bartending
                         lerpWarpInt[currentLayer] = Mathf.Lerp(0, lerpWarpIntTarget, lerpWarpCurve.Evaluate(time));
                         // UV动画
                         uvOffest.w = pourUVCurve.Evaluate(time);
-                        // 延迟更新颜色数组
+                        // 延迟更新颜色数组 // TODO：延迟更新封装
                         if(time > 0.3f)
                         {
                             updateColors = true;
