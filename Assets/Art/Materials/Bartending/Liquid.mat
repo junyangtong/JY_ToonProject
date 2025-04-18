@@ -159,7 +159,7 @@ Material:
     - _BubbleOutParallax: 0.17
     - _BubbleParallax: 0
     - _BubblePlxBias: 0.1
-    - _BubbleSpeed: -1.66
+    - _BubbleSpeed: -0.91
     - _BumpScale: 1
     - _ClearCoat: 0
     - _ClearCoatMask: 0
@@ -185,7 +185,7 @@ Material:
     - _LayerWarpInt: 1
     - _LayerWarpRange: 0.5
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 1
+    - _LiquidHeight01: 0.4
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
@@ -216,7 +216,7 @@ Material:
     - _UVTiling: 1.78
     - _WaterLineSmoothness: 1
     - _WaterLineWidth: 0.02
-    - _WaveAmplitude: 1.07
+    - _WaveAmplitude: 0
     - _WaveFrequency: 7.14
     - _WaveInt: 0.23
     - _WaveSpeed: 10
@@ -240,5 +240,5 @@ Material:
     - _Layer8: {r: 0.5, g: 0.3, b: 0.1, a: 0.8}
     - _Layer9: {r: 0.5, g: 0.3, b: 0.1, a: 0.8}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
-    - _UVOffest: {r: -0.7495326, g: -0.7495326, b: 0, a: 0}
+    - _UVOffest: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

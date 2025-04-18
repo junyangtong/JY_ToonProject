@@ -227,8 +227,8 @@ Shader "JY/Toon/Liquid"
 
                 // 高度裁剪
                     WaveInfo waveInfo = CalculateWave(relativePos);
-                float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
-                float clipPos = liquidHeightOS - relativePos.y;
+                float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset;
+                float clipPos = liquidHeightOS - relativePos.y + waveInfo.height;
                 clip(clipPos);
                 
                 // 获取每层液体的id
@@ -322,25 +322,24 @@ Shader "JY/Toon/Liquid"
 
                 // 高度裁剪
                     WaveInfo waveInfo = CalculateWave(relativePos);
-                float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
-                float clipPos = liquidHeightOS - relativePos.y;
+                float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset;
+                float clipPos = liquidHeightOS - relativePos.y + waveInfo.height;
                 clip(clipPos);
                 
                 // 获取每层液体的id
                 float liquidHeight0Max = relativePos.y / _MaxLiquidHeight * _MaxLayers;
                 uint currentID = floor(liquidHeight0Max - 0.5);
                 int nextID = min(_MaxLayers - 1, currentID + 1);
-                
+
                 //虚拟液面
                 // n * (intersectPos - liquidHeightWS) = 0
                 // intersectPos = input.positionWS + t * input.viewDirWS
-                half3 liquidHeightWS = float3(input.positionWS.x, originPosWS.y + liquidHeightOS, input.positionWS.z);
-                half3 n = waveInfo.normal;
+                half3 liquidHeightWS = float3(0.0, originPosWS.y + liquidHeightOS, 0.0);
+                half3 n = half3(0,1,0);//waveInfo.normal;
                 float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, liquidHeightWS - input.positionWS) / dot(n, input.viewDirWS);
                 // 虚拟平面深度覆盖深度缓冲
                 float3 planeViewDirWS = intersectPosWS - GetCameraPositionWS();
                 depthOUT = EyeDepthToLinear01(dot(planeViewDirWS, -UNITY_MATRIX_V[2].xyz));
-                
                 // 取当前最高层ID
                 uint currentIDMax = min(_MaxLayers - 1, floor(_LiquidHeight01 * _MaxLayers)); 
                 // 取当前最高层液体纹理
@@ -382,7 +381,7 @@ Shader "JY/Toon/Liquid"
                 
                 alpha = lerp(alpha, alpha + max(max(reflectionColor.r, reflectionColor.g), reflectionColor.b), fresnel) + mask;   //反射要写入alpha后面混合使用
                 finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + maskCol + bubbleCol;
-                return half4(1,0,0,1);//half4(finalColor, saturate(alpha));
+                return half4(finalColor, saturate(alpha));
             }
             ENDHLSL
         }
@@ -416,6 +415,7 @@ Shader "JY/Toon/Liquid"
                 // 高度裁剪
                     // 扰动
                     WaveInfo waveInfo = CalculateWave(relativePos);
+                    
                 float liquidHeightOS = _LiquidHeight01 * _MaxLiquidHeight + _LiquidHeightOffset + waveInfo.height;
                 float clipPos = liquidHeightOS - relativePos.y;
                 clip(clipPos);

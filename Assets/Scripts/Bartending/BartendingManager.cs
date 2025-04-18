@@ -75,7 +75,7 @@ namespace JY.Toon.Bartending
         private Vector4 uvOffest = new Vector4(0f, 0f, 0f, 0f);
         private Vector4 preUvOffest = new Vector4(0f, 0f, 0f, 0f);
         private int waveType = 1;
-        private bool updateColors = false;
+        private bool updateNextLayer = false;
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -334,19 +334,6 @@ namespace JY.Toon.Bartending
 
             // 切换波浪动画
             waveType = 1;
-
-            // 更新mask2DArr 不指定mask贴图时使用黑色
-            Texture2D newMask = liquidLayerData.data.maskTex;
-            if (newMask == null)
-            {
-                newMask = Texture2D.blackTexture;
-            }
-            Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
-
-            if (currentLayer < maxLayers - 1) // 和颜色一样 每次填充上面两层
-            {
-                Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
-            }
             
             float lerpRangeTarget = liquidLayerData.data.lerpRange;
             float lerpWarpIntTarget = liquidLayerData.data.lerpWarpInt;
@@ -371,12 +358,12 @@ namespace JY.Toon.Bartending
                         lerpWarpInt[currentLayer] = Mathf.Lerp(0, lerpWarpIntTarget, lerpWarpCurve.Evaluate(time));
                         // UV动画
                         uvOffest.w = pourUVCurve.Evaluate(time);
-                        // 延迟更新颜色数组 // TODO：延迟更新封装
+                        // 延迟更新数组和纹理
                         if(time > 0.3f)
                         {
-                            updateColors = true;
+                            updateNextLayer = true;
                         }
-                        UpdateLayerColors();
+                        UpdateNextLayer();
                         
                         // 只设置一次更新标志
                         shaderNeedUpdate = true;
@@ -386,10 +373,26 @@ namespace JY.Toon.Bartending
             currentLayer++;
             Debug.Log($"倒入第 {currentLayer} 层液体");
         }
-        //更新数组
-        private void UpdateLayerColors()
+
+        /// <summary>
+        /// 更新下一层数据
+        /// </summary>
+        private void UpdateNextLayer()
         {
-            if (updateColors == true)
+            // 更新mask2DArr 不指定mask贴图时使用黑色
+            Texture2D newMask = liquidLayerData.data.maskTex;
+            if (newMask == null)
+            {
+                newMask = Texture2D.blackTexture;
+            }
+            Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer);
+
+            if (currentLayer < maxLayers - 1) // 和颜色一样 每次填充上面两层
+            {
+                Graphics.Blit(newMask, layerMaskTexArray, 0, currentLayer + 1);
+            }
+            // 更新颜色数组
+            if (updateNextLayer == true)
             {
                 if (currentLayer < maxLayers - 1) // 防止CurrentColor和NextColor做插值时NextColor为默认颜色，每次填充上面两层
                 {
@@ -401,7 +404,7 @@ namespace JY.Toon.Bartending
                     Color layerColor = liquidLayerData.data.color;
                     layerColors[currentLayer] = layerColor;
                 }
-                updateColors = false;
+                updateNextLayer = false;
             }
         }
 #endregion
