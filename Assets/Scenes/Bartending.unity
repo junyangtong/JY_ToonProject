@@ -988,7 +988,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.50628924, g: 0.6781613, b: 1, a: 1}
   m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
@@ -1032,8 +1032,8 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 5000
-  m_UseColorTemperature: 1
+  m_ColorTemperature: 20000
+  m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
@@ -2736,14 +2736,14 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1970254216}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &1184819551
+--- !u!64 &1184819555
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1184819547}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: c8c9489d0785942438d50d94388e3070, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -3311,11 +3311,12 @@ MonoBehaviour:
   defaultLiquidColor: {r: 0.5, g: 0.3, b: 0.1, a: 0.8}
   waveAmplitude: 1
   waveFrequency: 7.14
-  waveSpeed: 10
+  waveSpeed: 5
   layerColors: []
   layerLerps: []
   bubbleInt: []
   lerpWarpInt: []
+  lerpWarpSize: []
   maskBlendCS: {fileID: 7200000, guid: ce59efa851f20ca4cae656d4f44add82, type: 3}
   liquidPourDuration: 5
   liquidBlendDuration: 5
@@ -3368,19 +3369,19 @@ MonoBehaviour:
       time: 0.3
       value: 0
       inSlope: 0
-      outSlope: 0
-      tangentMode: 0
+      outSlope: 3.1923227
+      tangentMode: 1
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.33333334
+      outWeight: 0.0781018
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 1.4285715
-      outSlope: 1.4285715
-      tangentMode: 34
+      inSlope: 0.2507046
+      outSlope: 0.2507046
+      tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0.21502726
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -3551,28 +3552,10 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.85016924
-      value: 0.17152
-      inSlope: 0.7506808
-      outSlope: 0.7506808
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 1
-    - serializedVersion: 3
-      time: 0.9366961
-      value: 0.3521063
-      inSlope: 3.9745634
-      outSlope: 3.9745634
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.48892674
-    - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 10.234658
-      outSlope: 10.234658
+      inSlope: 1.4835671
+      outSlope: 1.4835671
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -3602,8 +3585,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.29888886
     - serializedVersion: 3
-      time: 0.79111886
-      value: 0.38397226
+      time: 0.7547724
+      value: 0.41384897
       inSlope: 2.177664
       outSlope: 2.177664
       tangentMode: 0
@@ -3613,8 +3596,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 2.9491782
-      outSlope: 2.9491782
+      inSlope: 2.3902328
+      outSlope: 2.3902328
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -3726,6 +3709,39 @@ MonoBehaviour:
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  blendlerpCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.3
+      value: 0
+      inSlope: 0
+      outSlope: 5.014101
+      tangentMode: 1
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.02867026
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.26128113
+      outSlope: 0.26128113
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19772632
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -4587,7 +4603,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e5ada20139182884688df3c1f95064fb,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1184819551}
+      addedObject: {fileID: 1184819555}
   m_SourcePrefab: {fileID: 100100000, guid: e5ada20139182884688df3c1f95064fb, type: 3}
 --- !u!1 &2024705383
 GameObject:

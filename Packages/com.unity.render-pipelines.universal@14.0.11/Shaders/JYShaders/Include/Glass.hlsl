@@ -63,19 +63,8 @@ half4 GlassFragment(InputData inputData, SurfaceData surfaceData)
     float2 matcapUV = GetMatcapUV(inputData.normalWS);
     half4 matcapColor = SAMPLE_TEXTURE2D(_MatCapTex, sampler_MatCapTex, matcapUV);
     
-    // Blend主光光照
-    lightingData.mainLightColor = surfaceData.albedo + matcapColor.rgb;
-    lightingData.mainLightColor *= mainLight.shadowAttenuation;
-    
-    // 计算最终颜色
-    half4 finalColor;
-    #if REAL_IS_HALF
-    finalColor = min(CalculateFinalColor(lightingData, surfaceData.alpha), HALF_MAX);
-    #else
-    finalColor = CalculateFinalColor(lightingData, surfaceData.alpha);
-    #endif
-    
-    //finalColor.rgb = lerp(surfaceData.albedo, finalColor.rgb, fresnel);
+    half4 finalColor = half4(0,0,0,0);
+    finalColor.rgb = surfaceData.albedo + matcapColor.rgb * fresnel;
     
     finalColor.a = surfaceData.alpha;
     

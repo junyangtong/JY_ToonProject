@@ -17,6 +17,7 @@ public class LiquidLayerData : ScriptableObject
         public float bubbleInt = 0f; // 气泡强度
         [Range(0f, 1f)]
         public float lerpWarpInt = 0f; // 混合处扰动强度
+        public float lerpWarpSize = 0f; // 混合处扰动噪声图尺寸
     }
     public LiquidLayer data;
 } 

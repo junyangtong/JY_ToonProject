@@ -171,7 +171,7 @@ Material:
     - _EdgeWidth: 0.0475
     - _EnvironmentReflections: 1
     - _FillLevel: 1
-    - _FresnelIntensity: 0.8
+    - _FresnelIntensity: 1.1
     - _FresnelPow: 5.12
     - _Glass: 1
     - _GlossMapScale: 1

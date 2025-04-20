@@ -118,9 +118,9 @@ namespace JY.Toon.Bartending
             rigidBody.AddForce(buoyancy, ForceMode.Acceleration);
 
             // 旋转
-            Vector3 normalLatitudinal = waveInfo.normal;
+            /* Vector3 normalLatitudinal = waveInfo.normal;
             Vector3 torque = Vector3.Cross(transform.up, normalLatitudinal);
-            rigidBody.AddTorque(torque * buoyancyTorqueStrength, ForceMode.Acceleration);
+            rigidBody.AddTorque(torque * buoyancyTorqueStrength, ForceMode.Acceleration); */
             //Debug.Log($"bottomDepth{bottomDepth} + liquidHeight{liquidHeight} + localPosition{relativePosition.y} + centerToBottomOffset{centerToBottomOffset}");
             
             // 添加阻力
@@ -132,7 +132,6 @@ namespace JY.Toon.Bartending
             
             // Debug
             Debug.DrawRay(transform.position, waveInfo.normal * 0.5f, Color.blue);
-            Debug.DrawRay(transform.position, torque, Color.red);
         }
     }
 }

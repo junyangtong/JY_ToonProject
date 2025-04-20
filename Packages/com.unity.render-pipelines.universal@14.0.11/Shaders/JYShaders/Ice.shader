@@ -5,7 +5,8 @@ Shader "JY/Toon/Ice"
         _MatCapTex ("MatCap Texture", 2D) = "white" {}
         _BaseColor ("Base Color", Color) = (1, 1, 1, 1)
         _RefractIntensity ("Refract Intensity", Float) = 0.0
-        _NormalTex ("_NormalTex", 2D) = "bump"
+        _NormalTex ("NormalTex", 2D) = "bump"
+        _NormalInt ("NormalInt", Float) = 1.0
     }
 
     SubShader
@@ -31,6 +32,7 @@ Shader "JY/Toon/Ice"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
 
             struct Attributes
             {
@@ -56,6 +58,8 @@ Shader "JY/Toon/Ice"
             CBUFFER_START(UnityPerMaterial)
                 half _RefractIntensity;
                 half4 _BaseColor;
+                half _NormalInt;
+                half4 _NormalTex_ST;
             CBUFFER_END
 
             TEXTURE2D(_MatCapTex); SAMPLER(sampler_MatCapTex);
@@ -90,23 +94,25 @@ Shader "JY/Toon/Ice"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 
                 // 法线
-                half3 normalTS = SAMPLE_TEXTURE2D(_NormalTex, sampler_NormalTex, input.uv).rgb;
-                float3 normalWS = mul(normalTS, input.tangentToWorld);
+                half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalTex, sampler_NormalTex, input.uv * _NormalTex_ST.xy + _NormalTex_ST.zw));
+                float3 normalWS = normalize(mul(normalTS, input.tangentToWorld)) * _NormalInt;
 
                 // 折射
                 float2 screenUV = input.positionCS.xy / _ScreenParams.xy;
                 float3 normalVS = mul((float3x3)UNITY_MATRIX_V, normalWS);
                 float2 distortion = normalVS.xy;
                 float2 refractionUV = screenUV + distortion * _RefractIntensity;
-                half3 refractionColor = _BaseColor.rgb * SAMPLE_TEXTURE2D(_BackLiquidColorBuffer, sampler_BackLiquidColorBuffer, refractionUV).rgb;
-                half3 albedo = refractionColor;
+                
+                half3 sceneColor = SampleSceneColor(refractionUV);
+                half4 liquidColor = SAMPLE_TEXTURE2D(_BackLiquidColorBuffer, sampler_BackLiquidColorBuffer, refractionUV);
+                half3 refractionColor = lerp(sceneColor, liquidColor.rgb, step(0.001,liquidColor.a));
                 
                 // MatCap
                 float2 matcapUV = normalVS.xy * 0.5 + 0.5;
                 half4 matcapColor = SAMPLE_TEXTURE2D(_MatCapTex, sampler_MatCapTex, matcapUV);
-                half3 finalColor = albedo + matcapColor.rgb;
+                half3 finalColor = lerp(refractionColor, matcapColor.rgb, _BaseColor.a);
 
-                return half4(finalColor, input.positionCS.z);
+                return half4(finalColor * _BaseColor.rgb, input.positionCS.z);
             }
             ENDHLSL
         }

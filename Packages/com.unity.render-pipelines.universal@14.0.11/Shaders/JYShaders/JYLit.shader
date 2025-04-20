@@ -111,7 +111,6 @@ Shader "JY/JYLit"
             ZWrite[_ZWrite]
             Cull[_Cull]
             AlphaToMask[_AlphaToMask]
-            Offset 1, 1
 
             HLSLPROGRAM
             #pragma target 2.0

@@ -185,7 +185,7 @@ Material:
     - _MaxLayers: 5
     - _MaxLiquidHeight: 1.93
     - _MaxLiquidHeightOS: 1
-    - _Metallic: 0.993
+    - _Metallic: 1
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -195,7 +195,7 @@ Material:
     - _RefractIntensity: 0.05
     - _RimInt: 0.5
     - _Shininess: 1
-    - _Smoothness: 0.716
+    - _Smoothness: 0.805
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
     - _SpecularHighlights: 1
@@ -210,9 +210,9 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 0.89283746, b: 0.79559743, a: 0.5176471}
+    - _BaseColor: {r: 1, g: 0.84431744, b: 0.7012578, a: 1}
     - _Bubble_SV: {r: 1, g: 1, b: 0, a: 1}
-    - _Color: {r: 1, g: 0.89283746, b: 0.79559743, a: 0.5176471}
+    - _Color: {r: 1, g: 0.84431744, b: 0.7012578, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HeightMap_SV: {r: 1, g: 1, b: 1, a: 1}
     - _Layer0: {r: 0.5728863, g: 0.047169685, b: 1, a: 0}
