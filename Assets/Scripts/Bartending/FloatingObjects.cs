@@ -12,7 +12,7 @@ namespace JY.Toon.Bartending
         [SerializeField] private float centerToBottomOffset = 0f;
         [SerializeField] private Vector3 drag = new(1f, 1f, 1f);
         [SerializeField] private float angularDrag = 1f;
-        [SerializeField] private float buoyancyTorqueStrength = 1f;
+        //[SerializeField] private float buoyancyTorqueStrength = 1f;
 
         private Rigidbody rigidBody;
         private float liquidHeight;

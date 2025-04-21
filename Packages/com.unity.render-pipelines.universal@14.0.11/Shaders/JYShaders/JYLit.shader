@@ -46,6 +46,9 @@ Shader "JY/JYLit"
         _Thinkness("Thinkness", float) = 1
         _FresnelIntensity("FresnelIntensity", float) = 1
 
+        [Toggle(_SSR)] _SSR("Enable SSR", Float) = 0
+
+
         // SRP batching compatibility for Clear Coat (Not used in Lit)
         [HideInInspector] _ClearCoatMask("_ClearCoatMask", Float) = 0.0
         [HideInInspector] _ClearCoatSmoothness("_ClearCoatSmoothness", Float) = 0.0
@@ -137,6 +140,7 @@ Shader "JY/JYLit"
             #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
             #pragma shader_feature_local_fragment _SPECULAR_SETUP
             #pragma shader_feature_local _GLASS
+            #pragma shader_feature_local _SSR
 
             // -------------------------------------
             // Universal Pipeline keywords

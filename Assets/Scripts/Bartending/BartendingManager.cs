@@ -63,6 +63,8 @@ namespace JY.Toon.Bartending
         [SerializeField] private Button blendButton; 
         [SerializeField] private Dropdown liquidLayerDropdown; 
         [SerializeField] private Dropdown iceCountDropdown; 
+        [SerializeField] private Button decorationButton; 
+        [SerializeField] private GameObject decoration; 
         
         private LiquidLayerData liquidLayerData;
         private Material liquidMaterial;
@@ -79,6 +81,8 @@ namespace JY.Toon.Bartending
         private Vector4 preUvOffest = new Vector4(0f, 0f, 0f, 0f);
         private int waveType = 1;
         private bool updateNextLayer = false;
+        private bool decoraVisibility = false;
+
 
         public float LiquidHeight01 => liquidHeight01;
         public float MaxLiquidHeight => maxLiquidHeight;
@@ -453,7 +457,7 @@ namespace JY.Toon.Bartending
             averageBubbleInt /= currentLayer;
             int count = blendCount == 4 ? blendCount : currentLayer; // 要改变上面两层颜色
             RenderTexture averageMask = BartendingAnimation.AverageMask(layerMaskTexArray, count);
-            float averagelayerLerp = 0.5f;
+            float averagelayerLerp = 0.6f;
             // 切换波浪动画
             waveType = 0;
             
@@ -563,6 +567,10 @@ namespace JY.Toon.Bartending
             {
                 blendButton.onClick.AddListener(Blend);
             }
+            if (decorationButton != null)
+            {
+                decorationButton.onClick.AddListener(EnableDecoration);
+            }
             if (liquidLayerDropdown != null)
             {
                 // 生成Dropdown选项
@@ -603,6 +611,14 @@ namespace JY.Toon.Bartending
             if (selectedIndex >= 0 && selectedIndex < enumValues.Length)
             {
                 iceCount = enumValues[selectedIndex];
+            }
+        }
+        private void EnableDecoration()
+        {
+            decoraVisibility = !decoraVisibility;
+            if(decoration != null)
+            {
+                decoration.SetActive(decoraVisibility);
             }
         }
 #endregion

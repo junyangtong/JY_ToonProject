@@ -24,7 +24,8 @@ Material:
   m_Shader: {fileID: 4800000, guid: 46f84970e701a924fb0bc5c6019a488c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _NORMALMAP
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -46,7 +47,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 70808545148644f4287cdc6972bfdcd6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ClearCoatMap:
@@ -194,8 +195,9 @@ Material:
     - _ReflectionSource: 0
     - _RefractIntensity: 0.05
     - _RimInt: 0.5
+    - _SSR: 0
     - _Shininess: 1
-    - _Smoothness: 0.805
+    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
     - _SpecularHighlights: 1

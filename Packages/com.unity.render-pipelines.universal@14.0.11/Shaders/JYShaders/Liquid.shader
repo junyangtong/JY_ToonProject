@@ -294,7 +294,7 @@ Shader "JY/Toon/Liquid"
                     finalColor = finalColor + reflectColor.rgb * waterlineMask;
                 
                 alpha += waterlineMask + maskMixed;
-                return half4(finalColor, 1.0);//saturate(alpha));
+                return half4(finalColor, saturate(alpha));
             }
             ENDHLSL
         }

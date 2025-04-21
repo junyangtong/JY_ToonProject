@@ -13,6 +13,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
         MaterialProperty _RefractIntensity;
         MaterialProperty _Thinkness;
         MaterialProperty _FresnelIntensity;
+        MaterialProperty _SSR;
 
         public static readonly GUIContent hiInputs = EditorGUIUtility.TrTextContent("Glass Inputs",
             "These control the Glass property.");
@@ -35,6 +36,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
                 materialEditor.ShaderProperty(_RefractIntensity, "Refract Intensity");
                 materialEditor.ShaderProperty(_Thinkness, "Thinkness");
                 materialEditor.ShaderProperty(_FresnelIntensity, "Fresnel Intensity");
+                materialEditor.ShaderProperty(_SSR, "SSR");
             }
             return true;
         }
@@ -49,6 +51,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
             _RefractIntensity = FindProperty("_RefractIntensity", properties);
             _Thinkness = FindProperty("_Thinkness", properties);
             _FresnelIntensity = FindProperty("_FresnelIntensity", properties);
+            _SSR = FindProperty("_SSR", properties);
         }
 
         // material changed check
