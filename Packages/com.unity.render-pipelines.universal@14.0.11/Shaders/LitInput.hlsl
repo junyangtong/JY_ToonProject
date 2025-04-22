@@ -34,6 +34,10 @@ half _Surface;
 half _RefractIntensity;
 half _Thinkness;
 half _FresnelIntensity;
+
+// SSR
+half _PlanarReflectionIntensity;
+
 CBUFFER_END
 
 // NOTE: Do not ifdef the properties for dots instancing, but ifdef the actual usage.
@@ -132,6 +136,9 @@ TEXTURE2D(_ClearCoatMap);       SAMPLER(sampler_ClearCoatMap);
 #ifdef _GLASS
     TEXTURE2D(_MatCapTex);          SAMPLER(sampler_MatCapTex);
     TEXTURE2D(_LiquidFinalTexture); SAMPLER(sampler_LiquidFinalTexture);
+#endif
+#ifdef _PLANARREFLECTION
+    TEXTURE2D(_PlanarReflectionTexture); SAMPLER(sampler_PlanarReflectionTexture);
 #endif
 
 #ifdef _SPECULAR_SETUP
