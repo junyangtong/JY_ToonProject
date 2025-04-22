@@ -651,7 +651,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.08010214, y: -0, z: -0, w: 0.99678665}
-  m_LocalPosition: {x: 0, y: 4.8, z: -12.6}
+  m_LocalPosition: {x: 0, y: 4.58, z: -13.59}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -681,7 +681,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
-  m_Antialiasing: 0
+  m_Antialiasing: 3
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0
@@ -926,7 +926,7 @@ ReflectionProbe:
   m_TimeSlicingMode: 0
   m_Resolution: 128
   m_UpdateFrequency: 0
-  m_BoxSize: {x: 20, y: 20, z: 20}
+  m_BoxSize: {x: 26.92, y: 20, z: 20}
   m_BoxOffset: {x: 0, y: 0, z: 0}
   m_NearClip: 0.3
   m_FarClip: 1000
@@ -5231,6 +5231,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4674398304563639790}
   - component: {fileID: 4644071589171147341}
+  - component: {fileID: 7703820157343054124}
   m_Layer: 0
   m_Name: BartendingManager
   m_TagString: Untagged
@@ -5238,6 +5239,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &7703820157343054124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7703820157343054123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8c54659c040f4547b3d675e7725924c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_settings:
+    m_ResolutionMultiplier: 3
+    m_ClipPlaneOffset: 0.07
+    m_ReflectLayers:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    m_Shadows: 0
+  target: {fileID: 0}
+  m_planeOffset: 0
 --- !u!1 &8110424836350915367
 GameObject:
   m_ObjectHideFlags: 0

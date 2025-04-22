@@ -186,7 +186,7 @@ Material:
     - _LayerWarpRange: 0.5
     - _LayerWarpSize: 1
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.4
+    - _LiquidHeight01: 0.2
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
@@ -228,7 +228,7 @@ Material:
     - _Bubble_SV: {r: 1, g: 1, b: 0, a: 1}
     - _Color: {r: 1, g: 0.82052267, b: 0, a: 0.5058824}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FakePlaneUV: {r: 1, g: 2, b: 0, a: 0}
+    - _FakePlaneUV: {r: 0.6, g: 2, b: 0, a: 0}
     - _HeightMap_SV: {r: 1, g: 1, b: 1, a: 1}
     - _Layer0: {r: 0.5728863, g: 0.047169685, b: 1, a: 0}
     - _Layer1: {r: 0, g: 0.8613167, b: 1, a: 0}

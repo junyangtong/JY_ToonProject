@@ -115,7 +115,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _PlanarReflection: 1
-    - _PlanarReflectionIntensity: 0.121
+    - _PlanarReflectionIntensity: 0.3
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RefractIntensity: 1

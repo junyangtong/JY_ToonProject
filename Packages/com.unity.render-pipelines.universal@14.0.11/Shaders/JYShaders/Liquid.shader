@@ -372,7 +372,7 @@ Shader "JY/Toon/Liquid"
                 half bubbleMask = _BubbleInt[currentID];
                 half outBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV1).r * (1.0 - shallowFactor) * smoothstep(0.2, 0.3, liquidHeightOS);  // 液面透出的上升气泡 遮罩底部防止uv拉伸
                 half innerBubble = SAMPLE_TEXTURE2D(_BubbleTex, sampler_BubbleTex, bubbleUV2).r * circleMask;           // 液面上的静止气泡
-                half3 bubbleCol = bubbleMask * (outBubble + innerBubble) * finalColor * topMask;
+                half3 bubbleCol = bubbleMask * (outBubble * topMask + innerBubble) * finalColor;
                 
                 // 液体纹理颜色
                 half3 maskCol = mask.r * finalColor;
