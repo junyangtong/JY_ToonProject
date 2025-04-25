@@ -4766,6 +4766,11 @@ PrefabInstance:
       propertyPath: m_CastShadows
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6251986846143689675, guid: 0bb49f57d9206fd4793e7f2d1b81f43b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6567113431491126694, guid: 0bb49f57d9206fd4793e7f2d1b81f43b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -5454,7 +5459,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7703820157343054123}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8c54659c040f4547b3d675e7725924c, type: 3}
   m_Name: 

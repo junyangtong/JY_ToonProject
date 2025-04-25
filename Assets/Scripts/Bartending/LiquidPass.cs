@@ -8,8 +8,7 @@ namespace JY.Toon.Bartending
     {
         public RTHandle handle_SceneColor, handle_SceneDepth;
         public RTHandle handle_IceColor, handle_IceDepth;
-        public RTHandle handle_FrontLiquidColor, handle_FrontLiquidDepth;
-        public RTHandle handle_BackLiquidColor, handle_BackLiquidDepth;
+        public RTHandle handle_LiquidColor, handle_LiquidDepth;
 
         private Material mergeMat;
         private Renderer liquidRenderer;
@@ -21,10 +20,8 @@ namespace JY.Toon.Bartending
         public static readonly int id_SceneDepthBuffer = Shader.PropertyToID("_SceneDepthBuffer");
         public static readonly int id_IceColorBuffer = Shader.PropertyToID("_IceColorBuffer");
         public static readonly int id_IceDepthBuffer = Shader.PropertyToID("_IceDepthBuffer");
-        public static readonly int id_FrontLiquidColorBuffer = Shader.PropertyToID("_FrontLiquidColorBuffer");
-        public static readonly int id_FrontLiquidDepthBuffer = Shader.PropertyToID("_FrontLiquidDepthBuffer");
-        public static readonly int id_BackLiquidColorBuffer = Shader.PropertyToID("_BackLiquidColorBuffer");
-        public static readonly int id_BackLiquidDepthBuffer = Shader.PropertyToID("_BackLiquidDepthBuffer");
+        public static readonly int id_LiquidColorBuffer = Shader.PropertyToID("_LiquidColorBuffer");
+        public static readonly int id_LiquidDepthBuffer = Shader.PropertyToID("_LiquidDepthBuffer");
 
 
         private static readonly ProfilingSampler profilingSampler_Scene = new("LiquidPass_Scene");
@@ -61,18 +58,15 @@ namespace JY.Toon.Bartending
             RenderTextureDescriptor colorDesc = sRdr.cameraColorTargetHandle.rt.descriptor;
             colorDesc.colorFormat = RenderTextureFormat.ARGBHalf;
             RenderTextureDescriptor depthDesc = sRdr.cameraDepthTargetHandle.rt.descriptor;
-            // 场景RT
+            // 场景 RT
             RenderingUtils.ReAllocateIfNeeded(ref handle_SceneColor, colorDesc);
             RenderingUtils.ReAllocateIfNeeded(ref handle_SceneDepth, depthDesc);
             // 冰块 RT
             RenderingUtils.ReAllocateIfNeeded(ref handle_IceColor, colorDesc);
             RenderingUtils.ReAllocateIfNeeded(ref handle_IceDepth, depthDesc);
-            // front液体RT
-            RenderingUtils.ReAllocateIfNeeded(ref handle_FrontLiquidColor, colorDesc);
-            RenderingUtils.ReAllocateIfNeeded(ref handle_FrontLiquidDepth, depthDesc);
-            // back液体RT
-            RenderingUtils.ReAllocateIfNeeded(ref handle_BackLiquidColor, colorDesc);   
-            RenderingUtils.ReAllocateIfNeeded(ref handle_BackLiquidDepth, depthDesc);
+            // 液体 RT
+            RenderingUtils.ReAllocateIfNeeded(ref handle_LiquidColor, colorDesc);   
+            RenderingUtils.ReAllocateIfNeeded(ref handle_LiquidDepth, depthDesc);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -86,16 +80,16 @@ namespace JY.Toon.Bartending
                     tempCamColorHandle.rtHandleProperties.rtHandleScale.y
                 ) : Vector2.one;
 
-            // Pass1 液体Back
+            // Pass1 液体
             using (new ProfilingScope(cmd, profilingSampler_Liquid))
             {
-                CoreUtils.SetRenderTarget(cmd, handle_BackLiquidColor, handle_BackLiquidDepth, ClearFlag.All);
-                cmd.DrawRenderer(liquidRenderer, liquidMat, 0, 2);
+                CoreUtils.SetRenderTarget(cmd, handle_LiquidColor, handle_LiquidDepth, ClearFlag.All);
+                cmd.DrawRenderer(liquidRenderer, liquidMat, 0, 0);
                 cmd.DrawRenderer(liquidRenderer, liquidMat, 0, 1);
             }
-            iceMat.SetTexture(id_BackLiquidColorBuffer, handle_BackLiquidColor);
-            mergeMat.SetTexture(id_BackLiquidColorBuffer, handle_BackLiquidColor);
-            mergeMat.SetTexture(id_BackLiquidDepthBuffer, handle_BackLiquidDepth);
+            iceMat.SetTexture(id_LiquidColorBuffer, handle_LiquidColor);
+            mergeMat.SetTexture(id_LiquidColorBuffer, handle_LiquidColor);
+            mergeMat.SetTexture(id_LiquidDepthBuffer, handle_LiquidDepth);
             
             // Pass2 冰块 gpuinstance
             using (new ProfilingScope(cmd, profilingSampler_Ice))
@@ -108,23 +102,14 @@ namespace JY.Toon.Bartending
             }
             mergeMat.SetTexture(id_IceColorBuffer, handle_IceColor);
 
-            // Pass3 液体Front
-            using (new ProfilingScope(cmd, profilingSampler_Liquid))
-            {
-                CoreUtils.SetRenderTarget(cmd, handle_FrontLiquidColor, handle_FrontLiquidDepth, ClearFlag.All);
-                cmd.DrawRenderer(liquidRenderer, liquidMat, 0, 0);
-            }
-            mergeMat.SetTexture(id_FrontLiquidColorBuffer, handle_FrontLiquidColor);
-            mergeMat.SetTexture(id_FrontLiquidDepthBuffer, handle_FrontLiquidDepth);
-
-            // Pass4 混合
+            // Pass3 混合
             using (new ProfilingScope(cmd, profilingSampler_Merge))
             {
                 CoreUtils.SetRenderTarget(cmd, sRdr_Camera.cameraColorTargetHandle, sRdr_Camera.cameraDepthTargetHandle, ClearFlag.None);
                 cmd.DrawProcedural(Matrix4x4.identity, mergeMat, 0, MeshTopology.Triangles, 3, 1);
             }
 
-            // Pass5 copy场景给杯子做折射
+            // Pass4 copy场景给杯子做折射
             using (new ProfilingScope(cmd, profilingSampler_Scene))
             {
                 Blitter.BlitCameraTexture(cmd, sRdr_Camera.cameraColorTargetHandle, handle_SceneColor, 0, false);
@@ -142,10 +127,8 @@ namespace JY.Toon.Bartending
             handle_SceneDepth?.Release();
             handle_IceColor?.Release();
             handle_IceDepth?.Release();
-            handle_FrontLiquidColor?.Release();
-            handle_FrontLiquidDepth?.Release();
-            handle_BackLiquidColor?.Release();
-            handle_BackLiquidDepth?.Release();
+            handle_LiquidColor?.Release();
+            handle_LiquidDepth?.Release();
             CoreUtils.Destroy(mergeMat);
         }
     }
