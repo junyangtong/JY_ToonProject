@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     layerName: Ori
-    color: {r: 0.9811321, g: 0.31760314, b: 0.14501001, a: 1}
+    color: {r: 0.74213827, g: 0.20521353, b: 0.10968704, a: 1}
     maskTex: {fileID: 2800000, guid: 11004275970a28048b61f4e07f880a31, type: 3}
     lerpRange: 0.3
     bubbleInt: 0

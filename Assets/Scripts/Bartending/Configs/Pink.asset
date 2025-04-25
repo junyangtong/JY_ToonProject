@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     layerName: Pink
-    color: {r: 1, g: 0.43081754, b: 0.60042244, a: 0.5019608}
+    color: {r: 1, g: 0.1415093, b: 0.2481194, a: 0.5019608}
     maskTex: {fileID: 0}
-    lerpRange: 0.3
-    bubbleInt: 6.26
+    lerpRange: 0.4
+    bubbleInt: 5.9
     lerpWarpInt: 0
     lerpWarpSize: 0

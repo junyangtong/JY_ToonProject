@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     layerName: Blue
-    color: {r: 0.39937097, g: 0.47386762, b: 1, a: 0.56078434}
+    color: {r: 0, g: 0.067058325, b: 1, a: 0.79607844}
     maskTex: {fileID: 0}
-    lerpRange: 0.4
-    bubbleInt: 6.14
-    lerpWarpInt: 0
-    lerpWarpSize: 0
+    lerpRange: 0.358
+    bubbleInt: 4.66
+    lerpWarpInt: 1
+    lerpWarpSize: 0.03
