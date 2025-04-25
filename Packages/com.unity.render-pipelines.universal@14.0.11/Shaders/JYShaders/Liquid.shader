@@ -26,6 +26,10 @@ Shader "JY/Toon/Liquid"
         [Header(Back)]
         _ShallowRange("Shallow Range", Float) = 1.0
         _FakePlaneUV ("Fake Plane Uv X:surface Y:side", Vector) = (0.0, 0.0, 0.0, 0.0)
+        _NormalBlend ("NormalBlend", Float) = 0.5
+        _NormalBlendRange ("NormalBlendRange", Float) = 0.5
+        _SpecularInt ("SpecularInt", Float) = 1.0
+        _SpecularPow ("SpecularPow", Float) = 32.0
 
         [Header(Animation)]
         _UVOffest("UVOffest XY:Blend ZW:Pour", Vector) = (0.0, 0.0, 0.0, 0.0)
@@ -60,6 +64,10 @@ Shader "JY/Toon/Liquid"
             half4 _BubbleTex_ST;
             half4 _FakePlaneUV;
             half _WaterLineSmoothness;
+            half _NormalBlend;
+            half _NormalBlendRange;
+            half _SpecularInt;
+            half _SpecularPow;
         CBUFFER_END
 
         half _MaxLayers; // 当前最大层数
@@ -198,6 +206,14 @@ Shader "JY/Toon/Liquid"
         {
             return  reflect(viewDirWS, normalWS);
         }
+
+        // 计算杯壁的环形法线
+        float3 CalculateCylindricalNormal(float3 positionOS)
+        {
+            
+            float2 dirFromCenter = normalize(positionOS.xz);
+            return normalize(float3(dirFromCenter.x, 0, dirFromCenter.y));
+        }
         
         ENDHLSL
 
@@ -205,13 +221,13 @@ Shader "JY/Toon/Liquid"
         {
             Name "Draw Front"
             Tags {"LightMode" = "SRPDefaultUnlit"}
-            /* Stencil
+            Stencil
             {
                 Ref 1
                 Comp Always
                 Pass Replace
                 ZFail Replace // 确保在被其他物体遮挡时也能写入模板值
-            } */
+            }
             Cull Back
             Blend One Zero
             ZWrite On
@@ -338,8 +354,14 @@ Shader "JY/Toon/Liquid"
                 // n * (intersectPos - liquidHeightWS) = 0
                 // intersectPos = input.positionWS + t * input.viewDirWS
                 half3 liquidHeightWS = float3(0.0, originPosWS.y + liquidHeightOS, 0.0);
-                half3 n = half3(0,1,0);//waveInfo.normal;
+                half3 n = waveInfo.normal;
                 float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, liquidHeightWS - input.positionWS) / dot(n, input.viewDirWS);
+                // 法线混合模拟水面张力
+                half maskN = smoothstep(_NormalBlendRange, 1.0, length((intersectPosWS - originPosWS).xz));
+                half3 cupN = CalculateCylindricalNormal(intersectPosWS);
+                n = normalize(lerp(n, cupN, maskN * _NormalBlend));
+
+
                 // 虚拟平面深度覆盖深度缓冲
                 float3 planeViewDirWS = intersectPosWS - GetCameraPositionWS();
                 depthOUT = EyeDepthToLinear01(dot(planeViewDirWS, -UNITY_MATRIX_V[2].xyz));
@@ -379,11 +401,18 @@ Shader "JY/Toon/Liquid"
                 
                 // 反射
                 half fresnel = normalize(input.viewDirWS).y;
-                float3 reflectionUV = GetReflectionUV(waveInfo.normal, planeViewDirWS);
+                float3 reflectionUV = GetReflectionUV(n, planeViewDirWS);
                 half4 reflectionColor = SAMPLE_TEXTURECUBE(_CubeMap, sampler_CubeMap, reflectionUV);
+
+                // 高光
+                Light light = GetMainLight();
+                float3 viewDir = normalize(input.viewDirWS);
+                float3 halfDir = normalize(light.direction + viewDir);
+                half3 specular = light.color * pow(max(0, dot(n, halfDir)), _SpecularPow) * _SpecularInt;
                 
                 alpha = lerp(alpha, alpha + max(max(reflectionColor.r, reflectionColor.g), reflectionColor.b), fresnel) + mask;   //反射要写入alpha后面混合使用
-                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + maskCol + bubbleCol;
+                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + maskCol + bubbleCol + specular;
+                
                 return half4(finalColor, saturate(alpha));
             }
             ENDHLSL

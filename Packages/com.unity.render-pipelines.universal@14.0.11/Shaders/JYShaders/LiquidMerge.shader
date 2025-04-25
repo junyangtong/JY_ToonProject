@@ -33,10 +33,8 @@ Shader "JY/Toon/LiquidMerge"
                 UNITY_VERTEX_OUTPUT_STEREO
             };
             TEXTURE2D(_IceColorBuffer);                 SAMPLER(sampler_IceColorBuffer);
-            TEXTURE2D(_FrontLiquidColorBuffer);         SAMPLER(sampler_FrontLiquidColorBuffer);
-            TEXTURE2D(_FrontLiquidDepthBuffer);         SAMPLER(sampler_FrontLiquidDepthBuffer);
-            TEXTURE2D(_BackLiquidColorBuffer);          SAMPLER(sampler_BackLiquidColorBuffer);
-            TEXTURE2D(_BackLiquidDepthBuffer);          SAMPLER(sampler_BackLiquidDepthBuffer);
+            TEXTURE2D(_LiquidColorBuffer);             SAMPLER(sampler_LiquidColorBuffer);
+            TEXTURE2D(_LiquidDepthBuffer);             SAMPLER(sampler_LiquidDepthBuffer);
 
             CBUFFER_START(UnityPerMaterial)
                 float _WarpInt;
@@ -63,10 +61,8 @@ Shader "JY/Toon/LiquidMerge"
                 // 采样
                 half4 iceColor = SAMPLE_TEXTURE2D(_IceColorBuffer, sampler_IceColorBuffer, input.texcoord);
                 half iceDepth = iceColor.a;
-                half4 frontLiquidColor = SAMPLE_TEXTURE2D(_FrontLiquidColorBuffer, sampler_FrontLiquidColorBuffer, input.texcoord);
-                half frontLiquidDepth = SAMPLE_TEXTURE2D(_FrontLiquidDepthBuffer, sampler_FrontLiquidDepthBuffer, input.texcoord).r;
-                half4 backLiquidColor = SAMPLE_TEXTURE2D(_BackLiquidColorBuffer, sampler_BackLiquidColorBuffer, input.texcoord);   
-                half backLiquidDepth = SAMPLE_TEXTURE2D(_BackLiquidDepthBuffer, sampler_BackLiquidDepthBuffer, input.texcoord).r;
+                half4 liquidColor = SAMPLE_TEXTURE2D(_LiquidColorBuffer, sampler_LiquidColorBuffer, input.texcoord);
+                half liquidDepth = SAMPLE_TEXTURE2D(_LiquidDepthBuffer, sampler_LiquidDepthBuffer, input.texcoord).r;
 
                 // 混合颜色
                 half4 sceneColor = half4(SampleSceneColor(input.texcoord), 1.0);
@@ -75,19 +71,14 @@ Shader "JY/Toon/LiquidMerge"
                 half4 iceAndBackGround = lerp(sceneColor, iceColor, step(0.001, iceDepth));
                 
                 // 冰块和液面交界高亮
-                half backLiquidDepth01 = Linear01Depth(backLiquidDepth, _ZBufferParams);
+                half liquidDepth01 = Linear01Depth(liquidDepth, _ZBufferParams);
                 half iceDepth01 = Linear01Depth(iceDepth, _ZBufferParams);
-                half contactMask = smoothstep(backLiquidDepth01, backLiquidDepth01 + 0.00007, iceDepth01);
-                backLiquidColor.rgb = lerp(backLiquidColor.rgb * 1.5, backLiquidColor.rgb, contactMask);
+                half contactMask = smoothstep(liquidDepth01, liquidDepth01 + 0.00007, iceDepth01);
+                liquidColor.rgb = lerp(liquidColor.rgb * 1.5, liquidColor.rgb, contactMask);
 
-                // 液面
-                half4 back = lerp(iceAndBackGround * (1 - backLiquidColor.a) + backLiquidColor * backLiquidColor.a, iceAndBackGround, step(backLiquidDepth, iceDepth));
-
-                // 前侧液体
-                half4 finalColor = back * (1 - frontLiquidColor.a) + frontLiquidColor * frontLiquidColor.a;//front, frontLiquidColor.a);
+                half4 finalColor = lerp(iceAndBackGround * (1 - liquidColor.a) + liquidColor * liquidColor.a, iceAndBackGround, step(liquidDepth, iceDepth));
                 
                 // 混合深度
-                half liquidDepth = max(frontLiquidDepth, backLiquidDepth);
                 depthOUT = lerp(liquidDepth, iceDepth, step(liquidDepth, iceDepth));
                 return finalColor;
             }
