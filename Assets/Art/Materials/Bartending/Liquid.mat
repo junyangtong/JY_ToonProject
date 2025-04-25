@@ -186,7 +186,7 @@ Material:
     - _LayerWarpRange: 0.5
     - _LayerWarpSize: 1
     - _LerpWarpInt: 0
-    - _LiquidHeight01: 0.2
+    - _LiquidHeight01: 0.4
     - _LiquidHeight01Offset: 0
     - _LiquidHeightOffset: 0
     - _MaskInt: 1
@@ -196,11 +196,14 @@ Material:
     - _MaxLiquidHeightOS: 1
     - _Metallic: 0
     - _Mode: 0
+    - _NormalBlend: 0.59
+    - _NormalBlendRange: 0.7
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _ReflectionSource: 0
+    - _RefractInt: 1
     - _RimInt: 3
     - _ShallowRange: -0.02
     - _Shininess: 1
@@ -208,6 +211,8 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
     - _SpecularHighlights: 1
+    - _SpecularInt: 2
+    - _SpecularPow: 26
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 1
@@ -216,7 +221,7 @@ Material:
     - _UVSec: 0
     - _UVTiling: 1.78
     - _WaterLineSmoothness: 1
-    - _WaterLineWidth: 0.02
+    - _WaterLineWidth: 0.076
     - _WaveAmplitude: 0
     - _WaveFrequency: 7.14
     - _WaveInt: 0.23

@@ -19,7 +19,7 @@ Shader "JY/Toon/Liquid"
         _WaveSpeed ("WaveSpeed", Float) = 1.0
 
         [Header(Front)]
-        _WaterLineWidth ("WaterLineWidth", Float) = 1.0
+        _WaterLineWidth ("WaterLineWidth", Range(0,1)) = 1.0
         _RimInt ("RimInt", Float) = 1.0
         _WaterLineSmoothness ("WaterLineSmoothness", Float) = 1.0
 
@@ -299,7 +299,7 @@ Shader "JY/Toon/Liquid"
 
                 // 吃水线
                     // 折射
-                    half waterlineMask = min(smoothstep(0.1, 0.02, clipPos), smoothstep(0, _WaterLineWidth, clipPos)) * pow(saturate(dot(input.normalWS, normalize(input.viewDirWS))), 1);
+                    half waterlineMask = smoothstep(_WaterLineWidth, 0.0, clipPos) * saturate(dot(input.normalWS, normalize(input.viewDirWS)));
                     float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
                     float2 refractionUV = screenUV + waterlineMask * 0.3;
                     half3 waterlineCol = SampleSceneColor(refractionUV) * waterlineMask; 
@@ -402,16 +402,16 @@ Shader "JY/Toon/Liquid"
                 // 反射
                 half fresnel = normalize(input.viewDirWS).y;
                 float3 reflectionUV = GetReflectionUV(n, planeViewDirWS);
-                half4 reflectionColor = SAMPLE_TEXTURECUBE(_CubeMap, sampler_CubeMap, reflectionUV);
+                half3 reflectionColor = SAMPLE_TEXTURECUBE(_CubeMap, sampler_CubeMap, reflectionUV).rgb * finalColor;
 
                 // 高光
                 Light light = GetMainLight();
                 float3 viewDir = normalize(input.viewDirWS);
                 float3 halfDir = normalize(light.direction + viewDir);
-                half3 specular = light.color * pow(max(0, dot(n, halfDir)), _SpecularPow) * _SpecularInt;
+                half3 specular = finalColor * light.color * pow(max(0, dot(n, halfDir)), _SpecularPow) * _SpecularInt;
                 
                 alpha = lerp(alpha, alpha + max(max(reflectionColor.r, reflectionColor.g), reflectionColor.b), fresnel) + mask;   //反射要写入alpha后面混合使用
-                finalColor = lerp(finalColor, finalColor + reflectionColor.rgb, fresnel) + maskCol + bubbleCol + specular;
+                finalColor = lerp(finalColor, finalColor + reflectionColor, fresnel) + maskCol + bubbleCol + specular;
                 
                 return half4(finalColor, saturate(alpha));
             }
