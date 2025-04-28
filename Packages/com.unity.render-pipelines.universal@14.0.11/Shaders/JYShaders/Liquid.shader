@@ -358,6 +358,7 @@ Shader "JY/Toon/Liquid"
                 float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, liquidHeightWS - input.positionWS) / dot(n, input.viewDirWS);
                 // 法线混合模拟水面张力
                 half maskN = smoothstep(_NormalBlendRange, 1.0, length((intersectPosWS - originPosWS).xz));
+                maskN = min(maskN, 1-smoothstep(_NormalBlendRange, 0.9, length((intersectPosWS - originPosWS).xz)));
                 half3 cupN = CalculateCylindricalNormal(intersectPosWS);
                 n = normalize(lerp(n, cupN, maskN * _NormalBlend));
 
