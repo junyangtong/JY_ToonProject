@@ -351,11 +351,11 @@ Shader "JY/Toon/Liquid"
                 int nextID = min(_MaxLayers - 1, currentID + 1);
 
                 //虚拟液面
-                // n * (intersectPos - liquidHeightWS) = 0
+                // n * (intersectPos - planeCenter) = 0
                 // intersectPos = input.positionWS + t * input.viewDirWS
-                half3 liquidHeightWS = float3(0.0, originPosWS.y + liquidHeightOS, 0.0);
+                half3 planeCenter = float3(0.0, originPosWS.y + liquidHeightOS, 0.0);
                 half3 n = waveInfo.normal;
-                float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, liquidHeightWS - input.positionWS) / dot(n, input.viewDirWS);
+                float3 intersectPosWS = input.positionWS + input.viewDirWS * dot(n, planeCenter - input.positionWS) / dot(n, input.viewDirWS);
                 // 法线混合模拟水面张力
                 half maskN = smoothstep(_NormalBlendRange, 1.0, length((intersectPosWS - originPosWS).xz));
                 maskN = min(maskN, 1-smoothstep(_NormalBlendRange, 0.9, length((intersectPosWS - originPosWS).xz)));
