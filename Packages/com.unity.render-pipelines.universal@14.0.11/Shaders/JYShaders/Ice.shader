@@ -64,7 +64,7 @@ Shader "JY/Toon/Ice"
 
             TEXTURE2D(_MatCapTex); SAMPLER(sampler_MatCapTex);
             TEXTURE2D(_NormalTex); SAMPLER(sampler_NormalTex);
-            TEXTURE2D(_BackLiquidColorBuffer);       SAMPLER(sampler_BackLiquidColorBuffer);
+            TEXTURE2D(_LiquidColorBuffer);       SAMPLER(sampler_LiquidColorBuffer);
 
             Varyings vert(Attributes input)
             {
@@ -104,7 +104,7 @@ Shader "JY/Toon/Ice"
                 float2 refractionUV = screenUV + distortion * _RefractIntensity;
                 
                 half3 sceneColor = SampleSceneColor(refractionUV);
-                half4 liquidColor = SAMPLE_TEXTURE2D(_BackLiquidColorBuffer, sampler_BackLiquidColorBuffer, refractionUV);
+                half4 liquidColor = SAMPLE_TEXTURE2D(_LiquidColorBuffer, sampler_LiquidColorBuffer, refractionUV);
                 half3 refractionColor = lerp(sceneColor, liquidColor.rgb, step(0.001,liquidColor.a));
                 
                 // MatCap

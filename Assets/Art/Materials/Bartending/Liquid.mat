@@ -196,7 +196,7 @@ Material:
     - _MaxLiquidHeightOS: 1
     - _Metallic: 0
     - _Mode: 0
-    - _NormalBlend: 0.59
+    - _NormalBlend: 1.25
     - _NormalBlendRange: 0.7
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -212,7 +212,7 @@ Material:
     - _SpecSource: 0
     - _SpecularHighlights: 1
     - _SpecularInt: 2
-    - _SpecularPow: 26
+    - _SpecularPow: 12.42
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 1
