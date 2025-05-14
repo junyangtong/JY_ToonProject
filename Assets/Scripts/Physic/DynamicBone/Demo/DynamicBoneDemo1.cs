@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+namespace JY.Toon.DB
+{
 public class DynamicBoneDemo1 : MonoBehaviour
 {
     public GameObject m_Player;
@@ -40,4 +42,5 @@ public class DynamicBoneDemo1 : MonoBehaviour
             db.SetWeight(m_weight);
         }
     }
+}
 }

@@ -8,6 +8,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Threading;
 
+namespace JY.Toon.DB
+{
 [AddComponentMenu("Dynamic Bone/Dynamic Bone")]
 public class DynamicBone : MonoBehaviour
 {
@@ -1147,4 +1149,5 @@ public class DynamicBone : MonoBehaviour
         }
     }
 #endif
+}
 }

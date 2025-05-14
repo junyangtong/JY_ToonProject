@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+namespace JY.Toon.DB
+{
 public class DynamicBoneColliderBase : MonoBehaviour
 {
     public enum Direction
@@ -42,4 +44,5 @@ public class DynamicBoneColliderBase : MonoBehaviour
     {
         return false;
     }
+}
 }

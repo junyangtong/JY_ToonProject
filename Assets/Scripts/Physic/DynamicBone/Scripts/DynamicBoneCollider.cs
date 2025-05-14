@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+namespace JY.Toon.DB
+{
 [AddComponentMenu("Dynamic Bone/Dynamic Bone Collider")]
 public class DynamicBoneCollider : DynamicBoneColliderBase
 {
@@ -457,4 +459,5 @@ public class DynamicBoneCollider : DynamicBoneColliderBase
         Gizmos.DrawWireSphere(c0, radius0);
         Gizmos.DrawWireSphere(c1, radius1);
     }
+}
 }

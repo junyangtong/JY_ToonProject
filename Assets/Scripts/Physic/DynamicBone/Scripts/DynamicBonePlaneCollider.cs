@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+namespace JY.Toon.DB
+{
 [AddComponentMenu("Dynamic Bone/Dynamic Bone Plane Collider")]
 public class DynamicBonePlaneCollider : DynamicBoneColliderBase
 {
@@ -91,4 +93,5 @@ public class DynamicBonePlaneCollider : DynamicBoneColliderBase
         Vector3 p = transform.TransformPoint(m_Center);
         Gizmos.DrawLine(p, p + m_Plane.normal);
     }
+}
 }
