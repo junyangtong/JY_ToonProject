@@ -145,7 +145,9 @@ public class DynamicBoneJY : MonoBehaviour
         public Vector3 m_ObjectMove;
         public float m_Weight;
         public int m_AllParticleCount;
+        public int m_ParticleTreeCount;
         public int m_jobDataOffset;
+        public int m_jobTreeDataOffset;
         public int m_ParticleLoopCount;
 
         public float3 m_RootParentBoneWorldPos;
@@ -280,22 +282,6 @@ public class DynamicBoneJY : MonoBehaviour
 
     private void Awake()
     {
-        m_transform = this.transform;
-
-        m_headInfo = new HeadInfo();
-        m_headInfo.m_UpdateRate = this.m_UpdateRate;
-        m_headInfo.m_ObjectMove = this.m_ObjectMove;
-        m_headInfo.m_Weight = this.m_Weight;
-        m_AllParticleCount = 0;
-
-        m_AllParticles = new NativeArray<Particle>(MAX_TRANSFORM_LIMIT, Allocator.Persistent);
-        m_ParticleTrees = new NativeArray<ParticleTree>(MAX_PARTICLE_TREE_LIMIT, Allocator.Persistent);
-        m_AllTransforms = new Transform[MAX_TRANSFORM_LIMIT];
-        m_AllRootParentTransforms = new Transform[MAX_PARTICLE_TREE_LIMIT];
-        m_ParticleTreeCount = 0;
-
-        m_GravityNormalize = m_Gravity.normalized;
-
         SetupParticles();
       
     }
@@ -469,7 +455,7 @@ public class DynamicBoneJY : MonoBehaviour
     void OnDisable()
     {
         InitTransforms();
-    }
+    }*/
 
     void OnValidate()
     {
@@ -493,6 +479,7 @@ public class DynamicBoneJY : MonoBehaviour
                 UpdateParameters();
             }
         }
+        DynamicBoneJYManager.Instance.OnUpdate(this);
     }
 
     bool IsRootChanged()
@@ -514,19 +501,19 @@ public class DynamicBoneJY : MonoBehaviour
             }
         }
 
-        if (roots.Count != m_ParticleTrees.Count)
+        if (roots.Count != m_ParticleTreeCount)
             return true;
 
         for (int i = 0; i < roots.Count; ++i)
         {
-            if (roots[i] != m_ParticleTrees[i].m_Root)
+            if (roots[i] != m_AllRootParentTransforms[i])
                 return true;
         }
 
         return false;
     }
 
-    void OnDidApplyAnimationProperties()
+    /*void OnDidApplyAnimationProperties()
     {
         UpdateParameters();
     }
@@ -663,14 +650,37 @@ public class DynamicBoneJY : MonoBehaviour
  */
     public void SetupParticles()
     {
+        m_transform = this.transform;
+
+        m_headInfo = new HeadInfo();
+        m_headInfo.m_UpdateRate = this.m_UpdateRate;
+        m_headInfo.m_ObjectMove = this.m_ObjectMove;
+        m_headInfo.m_Weight = this.m_Weight;
+        m_AllParticleCount = 0;
+
+        m_AllParticles = new NativeArray<Particle>(MAX_TRANSFORM_LIMIT, Allocator.Persistent);
+        m_ParticleTrees = new NativeArray<ParticleTree>(MAX_PARTICLE_TREE_LIMIT, Allocator.Persistent);
+        m_AllTransforms = new Transform[MAX_TRANSFORM_LIMIT];
+        m_AllRootParentTransforms = new Transform[MAX_PARTICLE_TREE_LIMIT];
+        m_ParticleTreeCount = 0;
+
+        m_GravityNormalize = m_Gravity.normalized;
+
         //m_ParticleTrees.Clear();
         if (m_Root != null)
         {
             AppendParticleTree(m_Root);
+            m_rootParentTransform = m_Root.parent;
         }
 
         if (m_Roots != null)
         {
+            
+            if(m_rootParentTransform==null)
+            {
+                m_rootParentTransform = m_Roots[0].parent;
+            }
+
             for (int i = 0; i < m_Roots.Count; ++i)
             {
                 Transform root = m_Roots[i];
@@ -680,7 +690,7 @@ public class DynamicBoneJY : MonoBehaviour
                 bool exists = false;
                 for (int j = 0; j < MAX_PARTICLE_TREE_LIMIT; j++)
                 {
-                    if (m_AllRootParentTransforms[j] == root)
+                    if (m_AllRootParentTransforms[j] == root.parent)
                     {
                         exists = true;
                         break;
@@ -695,7 +705,6 @@ public class DynamicBoneJY : MonoBehaviour
             }
         }
 
-        m_rootParentTransform = m_Root.parent;
 
         m_ObjectScale = Mathf.Abs(transform.lossyScale.x);
         m_ObjectPrevPosition = transform.position;
@@ -706,12 +715,16 @@ public class DynamicBoneJY : MonoBehaviour
             ParticleTree pt = m_ParticleTrees[i];
             pt.m_ParticleStartIndex = m_AllParticleCount;
             Transform root = m_AllRootParentTransforms[i];
-            AppendParticles(pt, root, -1, 0);
+            
+            AppendParticles(ref pt, root, -1, 0);
+
+            m_ParticleTrees[i] = pt;
         }
 
         UpdateParameters();
 
         m_headInfo.m_AllParticleCount = m_AllParticleCount;
+        m_headInfo.m_ParticleTreeCount = m_ParticleTreeCount;
     }
 
     void AppendParticleTree(Transform root)
@@ -728,7 +741,7 @@ public class DynamicBoneJY : MonoBehaviour
         m_AllRootParentTransforms[pt.index] = root;
     }
 
-    void AppendParticles(ParticleTree pt, Transform b, int parentIndex, float boneLength)
+    void AppendParticles(ref ParticleTree pt, Transform b, int parentIndex, float boneLength)
     {
         var p = new Particle();
         //p.m_Transform = b;
@@ -801,17 +814,17 @@ public class DynamicBoneJY : MonoBehaviour
                 }
                 if (!exclude)
                 {
-                    AppendParticles(pt, child, index, boneLength);
+                    AppendParticles(ref pt, child, index, boneLength);
                 }
                 else if (m_EndLength > 0 || m_EndOffset != Vector3.zero)
                 {
-                    AppendParticles(pt, null, index, boneLength);
+                    AppendParticles(ref pt, null, index, boneLength);
                 }
             }
 
             if (b.childCount == 0 && (m_EndLength > 0 || m_EndOffset != Vector3.zero))
             {
-                AppendParticles(pt, null, index, boneLength);
+                AppendParticles(ref pt, null, index, boneLength);
             }
         }
     }
