@@ -513,7 +513,7 @@ public class DynamicBoneJY : MonoBehaviour
         return false;
     }
 
-    /*void OnDidApplyAnimationProperties()
+    void OnDidApplyAnimationProperties()
     {
         UpdateParameters();
     }
@@ -523,14 +523,14 @@ public class DynamicBoneJY : MonoBehaviour
         if (!enabled)
             return;
 
-        if (Application.isEditor && !Application.isPlaying && transform.hasChanged)
+        //if (Application.isEditor && !Application.isPlaying && transform.hasChanged)
         {
             //InitTransforms();
             SetupParticles();
         }
 
         Gizmos.color = Color.white;
-        for (int i = 0; i < m_ParticleTrees.Count; ++i)
+        for (int i = 0; i < m_ParticleTreeCount; ++i)
         {
             DrawGizmos(m_ParticleTrees[i]);
         }
@@ -538,21 +538,21 @@ public class DynamicBoneJY : MonoBehaviour
 
     void DrawGizmos(ParticleTree pt)
     {
-        for (int i = 0; i < pt.m_Particles.Count; ++i)
+        for (int i = 0; i < pt.m_SingleTreeParticleCount; ++i)
         {
-            Particle p = pt.m_Particles[i];
+            Particle p = m_AllParticles[pt.m_ParticleStartIndex + i];
             if (p.m_ParentIndex >= 0)
             {
-                Particle p0 = pt.m_Particles[p.m_ParentIndex];
-                Gizmos.DrawLine(p.m_Position, p0.m_Position);
+                Particle p0 = m_AllParticles[p.m_ParentIndex];
+                Gizmos.DrawLine(p.tmpWorldPosition, p0.tmpWorldPosition);
             }
 
             if (p.m_Radius > 0)
             {
-                Gizmos.DrawWireSphere(p.m_Position, p.m_Radius * m_ObjectScale);
+                Gizmos.DrawWireSphere(m_AllTransforms[p.index].position, p.m_Radius * m_ObjectScale);
             }
         }
-    }*/
+    }
     public void ClearJobData()
     {
         if (m_AllParticles.IsCreated)
@@ -787,6 +787,7 @@ public class DynamicBoneJY : MonoBehaviour
             }
             //p.m_Position = p.m_PrevPosition = pb.TransformPoint(p.m_EndOffset);
             p.tmpWorldPosition = p.tmpPrevWorldPosition = pb.TransformPoint(p.m_EndOffset);
+
         }
 
         if (parentIndex >= 0)

@@ -184,14 +184,30 @@ namespace JY.Toon.DB
                         float3 ePos = p.worldPosition;
                         float3 ep0Pos = p0.worldPosition;
 
-                        float erestLen = math.distance(ep0Pos, ePos);
+                        float erestLen;
+                        if (p.m_TransformNotNull == 1)
+                        {
+                            erestLen = math.distance(ep0Pos, ePos);
+                        }
+                        else
+                        {
+                            float3 parentPosition = curHeadInfo.m_RootParentBoneWorldPos;
+                            erestLen = math.length(parentPosition + p.m_EndOffset);
+                        }
 
                         float stiffness = Mathf.Lerp(1.0f, p.m_Stiffness, curHeadInfo.m_Weight);
                         if (stiffness > 0 || p.m_Elasticity > 0)
                         {
                             float4x4 em0 = float4x4.TRS(p0.tmpWorldPosition, p0.worldRotation, p.parentScale);
-                            
-                            float3 erestPos = math.mul(em0, new float4(p.localPosition.xyz, 1)).xyz;
+                            float3 erestPos;
+                            if (p.m_TransformNotNull == 1)
+                            {
+                                erestPos = math.mul(em0, new float4(p.localPosition.xyz, 1)).xyz;
+                            }
+                            else
+                            {
+                                erestPos = math.mul(em0, new float4(p.m_EndOffset, 1)).xyz;
+                            }
                             
                             float3 ed = erestPos - p.tmpWorldPosition;
                             float3 eStepElasticity = ed * p.m_Elasticity;
@@ -263,7 +279,15 @@ namespace JY.Toon.DB
 
                         if (p0.m_ChildCount <= 1)
                         {
-                            float3 ev = p.localPosition;
+                            float3 ev;
+                            if (p.m_TransformNotNull == 1)
+                            {
+                                ev = p.localPosition;
+                            }
+                            else
+                            {
+                                ev = p.m_EndOffset;
+                            }
                             float3 ev2 = p.tmpWorldPosition - p0.tmpWorldPosition;
 
                             float4x4 epm = float4x4.TRS(p.worldPosition, p.worldRotation, p.parentScale);
