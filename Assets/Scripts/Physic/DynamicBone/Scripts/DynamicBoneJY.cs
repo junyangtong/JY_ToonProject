@@ -135,6 +135,7 @@ public class DynamicBoneJY : MonoBehaviour
     float m_Weight = 1.0f;
     bool m_DistantDisabled = false;
     int m_PreUpdateCount = 0;
+    public Vector3 m_LocalGravity = Vector3.zero;
     public struct HeadInfo
     {
         int m_HeadIndex;
@@ -282,6 +283,29 @@ public class DynamicBoneJY : MonoBehaviour
 
     private void Awake()
     {
+        m_headInfo = new HeadInfo();
+        m_headInfo.m_UpdateRate = this.m_UpdateRate;
+        m_headInfo.m_ObjectMove = this.m_ObjectMove;
+        m_headInfo.m_Weight = this.m_Weight;
+        m_AllParticleCount = 0;
+
+        m_AllParticles = new NativeArray<Particle>(MAX_TRANSFORM_LIMIT, Allocator.Persistent);
+        m_ParticleTrees = new NativeArray<ParticleTree>(MAX_PARTICLE_TREE_LIMIT, Allocator.Persistent);
+        m_AllTransforms = new Transform[MAX_TRANSFORM_LIMIT];
+        m_AllRootParentTransforms = new Transform[MAX_PARTICLE_TREE_LIMIT];
+        m_ParticleTreeCount = 0;
+
+        /* // 还原重力和外力影响
+        m_LocalGravity = m_Root.InverseTransformDirection(m_Gravity);
+        m_GravityNormalize = m_Gravity.normalized;
+        Vector3 force = m_Gravity;
+        Vector3 fdir = m_GravityNormalize;
+        Vector3 rf = m_Root.TransformDirection(m_LocalGravity);
+        Vector3 pf = fdir * Mathf.Max(Vector3.Dot(rf, fdir), 0);	// project current gravity to rest gravity
+        force -= pf;	// remove projected gravity
+        force = (force + m_Force) * m_ObjectScale;
+        m_headInfo.m_PerFrameForce = force; */
+
         SetupParticles();
       
     }
@@ -457,18 +481,18 @@ public class DynamicBoneJY : MonoBehaviour
         InitTransforms();
     }*/
 
-    void OnValidate()
+    /* void OnValidate()
     {
-        m_UpdateRate = Mathf.Max(m_UpdateRate, 0);
-        m_Damping = Mathf.Clamp01(m_Damping);
-        m_Elasticity = Mathf.Clamp01(m_Elasticity);
-        m_Stiffness = Mathf.Clamp01(m_Stiffness);
-        m_Inert = Mathf.Clamp01(m_Inert);
-        m_Friction = Mathf.Clamp01(m_Friction);
-        m_Radius = Mathf.Max(m_Radius, 0);
-
         if (Application.isEditor && Application.isPlaying)
         {
+            m_UpdateRate = Mathf.Max(m_UpdateRate, 0);
+            m_Damping = Mathf.Clamp01(m_Damping);
+            m_Elasticity = Mathf.Clamp01(m_Elasticity);
+            m_Stiffness = Mathf.Clamp01(m_Stiffness);
+            m_Inert = Mathf.Clamp01(m_Inert);
+            m_Friction = Mathf.Clamp01(m_Friction);
+            m_Radius = Mathf.Max(m_Radius, 0);
+
             if (IsRootChanged())
             {
                 InitTransforms();
@@ -476,11 +500,16 @@ public class DynamicBoneJY : MonoBehaviour
             }
             else
             {
+                if (!m_AllParticles.IsCreated || !m_ParticleTrees.IsCreated)
+                {
+                    SetupParticles();
+                }
                 UpdateParameters();
             }
+            DynamicBoneJYManager.Instance.OnUpdate(this);
         }
-        DynamicBoneJYManager.Instance.OnUpdate(this);
-    }
+        
+    } */
 
     bool IsRootChanged()
     {
@@ -518,12 +547,12 @@ public class DynamicBoneJY : MonoBehaviour
         UpdateParameters();
     }
 
-    void OnDrawGizmosSelected()
+    /* void OnDrawGizmosSelected()
     {
         if (!enabled)
             return;
 
-        //if (Application.isEditor && !Application.isPlaying && transform.hasChanged)
+        if (Application.isEditor && !Application.isPlaying && transform.hasChanged)
         {
             //InitTransforms();
             SetupParticles();
@@ -534,7 +563,7 @@ public class DynamicBoneJY : MonoBehaviour
         {
             DrawGizmos(m_ParticleTrees[i]);
         }
-    }
+    } */
 
     void DrawGizmos(ParticleTree pt)
     {
@@ -652,20 +681,6 @@ public class DynamicBoneJY : MonoBehaviour
     {
         m_transform = this.transform;
 
-        m_headInfo = new HeadInfo();
-        m_headInfo.m_UpdateRate = this.m_UpdateRate;
-        m_headInfo.m_ObjectMove = this.m_ObjectMove;
-        m_headInfo.m_Weight = this.m_Weight;
-        m_AllParticleCount = 0;
-
-        m_AllParticles = new NativeArray<Particle>(MAX_TRANSFORM_LIMIT, Allocator.Persistent);
-        m_ParticleTrees = new NativeArray<ParticleTree>(MAX_PARTICLE_TREE_LIMIT, Allocator.Persistent);
-        m_AllTransforms = new Transform[MAX_TRANSFORM_LIMIT];
-        m_AllRootParentTransforms = new Transform[MAX_PARTICLE_TREE_LIMIT];
-        m_ParticleTreeCount = 0;
-
-        m_GravityNormalize = m_Gravity.normalized;
-
         //m_ParticleTrees.Clear();
         if (m_Root != null)
         {
@@ -779,13 +794,14 @@ public class DynamicBoneJY : MonoBehaviour
                 if (ppb != null)
                     p.m_EndOffset = pb.InverseTransformPoint((pb.position * 2 - ppb.position)) * m_EndLength;
                 else
-                    p.m_EndOffset = new Vector3(m_EndLength, 0, 0);
+                    p.m_EndOffset = new float3(m_EndLength, 0, 0);
             }
             else
             {
                 p.m_EndOffset = pb.InverseTransformPoint(transform.TransformDirection(m_EndOffset) + pb.position);
             }
             //p.m_Position = p.m_PrevPosition = pb.TransformPoint(p.m_EndOffset);
+            p.parentScale = pb.lossyScale;
             p.tmpWorldPosition = p.tmpPrevWorldPosition = pb.TransformPoint(p.m_EndOffset);
 
         }

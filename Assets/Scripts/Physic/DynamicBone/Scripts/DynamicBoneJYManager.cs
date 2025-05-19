@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Jobs;
@@ -191,8 +190,9 @@ namespace JY.Toon.DB
                         }
                         else
                         {
-                            float3 parentPosition = curHeadInfo.m_RootParentBoneWorldPos;
-                            erestLen = math.length(parentPosition + p.m_EndOffset);
+                            float4x4 localToWorld = float4x4.TRS(p0.tmpWorldPosition, p0.worldRotation, p.parentScale);
+                            float3 worldEndOffset = math.mul(localToWorld, new float4(p.m_EndOffset, 0)).xyz;
+                            erestLen = math.length(worldEndOffset);
                         }
 
                         float stiffness = Mathf.Lerp(1.0f, p.m_Stiffness, curHeadInfo.m_Weight);
@@ -290,11 +290,9 @@ namespace JY.Toon.DB
                             }
                             float3 ev2 = p.tmpWorldPosition - p0.tmpWorldPosition;
 
-                            float4x4 epm = float4x4.TRS(p.worldPosition, p.worldRotation, p.parentScale);
-
-                            var worldV = math.mul(epm, new float4(ev, 0)).xyz;
+                            var worldV = math.mul(p0.worldRotation, ev).xyz;    // 用来求角度所以只还原世界空间旋转
                             Quaternion erot = Quaternion.FromToRotation(worldV, ev2);
-                            var eoutputRot = math.mul(erot, p.worldRotation);
+                            var eoutputRot = math.mul(erot, p0.worldRotation);
                             p0.worldRotation = eoutputRot;
                         }
 
@@ -579,29 +577,37 @@ namespace JY.Toon.DB
         
         private void OnDestroy()
         {
+            // 完成所有job
+            m_lastJobHandle.Complete();
+            
             if (this.m_particleTransformArr.isCreated)
             {
                 this.m_particleTransformArr.Dispose();
             }
-
+            
             if (this.m_particleInfo.IsCreated)
             {
                 this.m_particleInfo.Dispose();
             }
-
+            
             if (this.m_headInfo.IsCreated)
             {
                 this.m_headInfo.Dispose();
             }
-
+            
             if (this.m_headRootTransform.isCreated)
             {
                 this.m_headRootTransform.Dispose();
             }
-
+            
             if (this.m_particleTreeInfo.IsCreated)
             {
                 this.m_particleTreeInfo.Dispose();
+            }
+            
+            if (m_instance == this)
+            {
+                m_instance = null;
             }
         }
     }

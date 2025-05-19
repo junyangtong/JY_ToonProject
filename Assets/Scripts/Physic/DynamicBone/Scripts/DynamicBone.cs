@@ -854,7 +854,7 @@ public class DynamicBone : MonoBehaviour
                 }
 
                 Vector3 d = restPos - p.m_Position;
-                p.m_Position += d * (p.m_Elasticity * timeVar);
+                p.m_Position += d * (p.m_Elasticity * timeVar); // 弹性系数也可以理解成每帧向模板位置移动的步长
 
                 if (stiffness > 0)
                 {
