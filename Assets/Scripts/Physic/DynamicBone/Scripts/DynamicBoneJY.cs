@@ -8,8 +8,8 @@ namespace JY.Toon.DB
 [AddComponentMenu("Dynamic Bone/Dynamic Bone JY")]
 public class DynamicBoneJY : MonoBehaviour
 {
-    public const int MAX_TRANSFORM_LIMIT = 50;
-    public const int MAX_PARTICLE_TREE_LIMIT = 10;
+    public const int MAX_TRANSFORM_LIMIT = 250;
+    public const int MAX_PARTICLE_TREE_LIMIT = 40;
 
 #if UNITY_5_3_OR_NEWER
     [Tooltip("The roots of the transform hierarchy to apply physics.")]
@@ -588,8 +588,13 @@ public class DynamicBoneJY : MonoBehaviour
         {
             m_AllParticles.Dispose();
         }
-
+        if (m_ParticleTrees.IsCreated)
+        {
+            m_ParticleTrees.Dispose();
+        }
+        
         m_AllTransforms = null;
+        m_AllRootParentTransforms = null;
     }
     void OnEnable()
     {

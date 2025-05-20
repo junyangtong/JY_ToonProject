@@ -23,12 +23,14 @@ namespace JY.Toon.DB
                         GameObject go = new GameObject("DynamicBoneJYManager");
                         m_instance = go.AddComponent<DynamicBoneJYManager>();
                     }
+                    
                     m_instance.Init();
                 }
 
                 return m_instance;
             }
         }
+
 
         // 让子物体不受unity transform的影响
         [BurstCompile]
@@ -603,11 +605,6 @@ namespace JY.Toon.DB
             if (this.m_particleTreeInfo.IsCreated)
             {
                 this.m_particleTreeInfo.Dispose();
-            }
-            
-            if (m_instance == this)
-            {
-                m_instance = null;
             }
         }
     }
