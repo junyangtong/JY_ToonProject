@@ -386,4 +386,4 @@ UniTask blendMaskTask = BartendingAnimation.MaskAnimationAsync(
 ## 最后
 
 本项目仅作为个人学习使用
-如有错误，还请各位大佬多多指教！
+如有错误，还请指正
