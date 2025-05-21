@@ -141,9 +141,9 @@ public class DynamicBoneJY : MonoBehaviour
         int m_HeadIndex;
 
         public float m_UpdateRate;
-        public Vector3 m_PerFrameForce;
+        public float3 m_PerFrameForce;
 
-        public Vector3 m_ObjectMove;
+        public float3 m_ObjectMove;
         public float m_Weight;
         public int m_AllParticleCount;
         public int m_ParticleTreeCount;
@@ -294,17 +294,6 @@ public class DynamicBoneJY : MonoBehaviour
         m_AllTransforms = new Transform[MAX_TRANSFORM_LIMIT];
         m_AllRootParentTransforms = new Transform[MAX_PARTICLE_TREE_LIMIT];
         m_ParticleTreeCount = 0;
-
-        /* // 还原重力和外力影响
-        m_LocalGravity = m_Root.InverseTransformDirection(m_Gravity);
-        m_GravityNormalize = m_Gravity.normalized;
-        Vector3 force = m_Gravity;
-        Vector3 fdir = m_GravityNormalize;
-        Vector3 rf = m_Root.TransformDirection(m_LocalGravity);
-        Vector3 pf = fdir * Mathf.Max(Vector3.Dot(rf, fdir), 0);	// project current gravity to rest gravity
-        force -= pf;	// remove projected gravity
-        force = (force + m_Force) * m_ObjectScale;
-        m_headInfo.m_PerFrameForce = force; */
 
         SetupParticles();
     }
@@ -684,15 +673,25 @@ public class DynamicBoneJY : MonoBehaviour
         }
     } 
  */
+    /// <summary>
+    /// 初始化
+    /// </summary>
     public void SetupParticles()
     {
         m_transform = this.transform;
+
+        // 还原重力和外力影响
+        Vector3 rf = Vector3.zero;
 
         //m_ParticleTrees.Clear();
         if (m_Root != null)
         {
             AppendParticleTree(m_Root);
             m_rootParentTransform = m_Root.parent;
+
+            // 还原重力和外力影响
+            m_LocalGravity = m_Root.InverseTransformDirection(m_Gravity);
+            rf = m_Root.TransformDirection(m_LocalGravity);
         }
 
         if (m_Roots != null)
@@ -701,6 +700,10 @@ public class DynamicBoneJY : MonoBehaviour
             if(m_rootParentTransform==null)
             {
                 m_rootParentTransform = m_Roots[0].parent;
+
+                // 还原重力和外力影响
+                m_LocalGravity = m_Roots[0].InverseTransformDirection(m_Gravity);
+                rf = m_Roots[0].TransformDirection(m_LocalGravity);
             }
 
             for (int i = 0; i < m_Roots.Count; ++i)
@@ -727,10 +730,18 @@ public class DynamicBoneJY : MonoBehaviour
             }
         }
 
-
         m_ObjectScale = Mathf.Abs(transform.lossyScale.x);
         m_ObjectPrevPosition = transform.position;
         m_ObjectMove = Vector3.zero;
+
+        // 还原重力和外力影响
+        m_GravityNormalize = m_Gravity.normalized;
+        Vector3 force = m_Gravity;
+        Vector3 fdir = m_GravityNormalize;
+        Vector3 pf = fdir * Mathf.Max(Vector3.Dot(rf, fdir), 0);	// project current gravity to rest gravity
+        force -= pf;	// remove projected gravity
+        force = (force + m_Force) * m_ObjectScale;
+        m_headInfo.m_PerFrameForce = force;
 
         for (int i = 0; i < m_ParticleTreeCount; ++i)
         {

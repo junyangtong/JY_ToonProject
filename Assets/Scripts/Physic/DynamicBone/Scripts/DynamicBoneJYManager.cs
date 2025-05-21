@@ -645,12 +645,8 @@ namespace JY.Toon.DB
                 // 添加半径球体绘制
                 if (p.m_Radius > 0)
                 {
-
-                    if (m_particleTransformArr[pIdx].position != Vector3.zero)
-                    {
-                        float objectScale = Mathf.Abs(m_headRootTransform[headIndex].lossyScale.x);
-                        Gizmos.DrawWireSphere(m_particleTransformArr[pIdx].position, p.m_Radius * objectScale);
-                    }
+                    float objectScale = Mathf.Abs(m_headRootTransform[headIndex].lossyScale.x);
+                    Gizmos.DrawWireSphere(p.tmpWorldPosition, p.m_Radius * objectScale);
                 }
             }
         }
