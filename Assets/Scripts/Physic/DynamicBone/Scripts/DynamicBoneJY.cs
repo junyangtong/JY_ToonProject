@@ -307,7 +307,6 @@ public class DynamicBoneJY : MonoBehaviour
         m_headInfo.m_PerFrameForce = force; */
 
         SetupParticles();
-      
     }
     public HeadInfo ResetHeadIndexAndDataOffset(int headIndex)
     {
@@ -563,7 +562,7 @@ public class DynamicBoneJY : MonoBehaviour
         {
             DrawGizmos(m_ParticleTrees[i]);
         }
-    } */
+    }
 
     void DrawGizmos(ParticleTree pt)
     {
@@ -581,7 +580,7 @@ public class DynamicBoneJY : MonoBehaviour
                 Gizmos.DrawWireSphere(m_AllTransforms[p.index].position, p.m_Radius * m_ObjectScale);
             }
         }
-    }
+    } */
     public void ClearJobData()
     {
         if (m_AllParticles.IsCreated)
@@ -607,8 +606,11 @@ public class DynamicBoneJY : MonoBehaviour
     void OnDisable()
     {
         InitTransforms();
-
-        DynamicBoneJYManager.Instance.OnExit(this, ref m_headInfo);
+        ClearJobData();
+        if(DynamicBoneJYManager.Instance != null)
+        {
+            DynamicBoneJYManager.Instance.OnExit(this, ref m_headInfo);
+        }
     }
 
     public void SetWeight(float w)

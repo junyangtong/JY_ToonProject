@@ -9,22 +9,21 @@ namespace JY.Toon.DB
 {
     public class DynamicBoneJYManager : MonoBehaviour
     {
+        public bool EnableGizmos = false;
         private static DynamicBoneJYManager m_instance;
 
         public static DynamicBoneJYManager Instance
         {
             get
             {
-                if(null == m_instance)
+                if(m_instance == null)
                 {
                     m_instance = GameObject.FindObjectOfType<DynamicBoneJYManager>();
-                    if (!m_instance)
+
+                    if(m_instance != null)
                     {
-                        GameObject go = new GameObject("DynamicBoneJYManager");
-                        m_instance = go.AddComponent<DynamicBoneJYManager>();
+                        m_instance.Init();
                     }
-                    
-                    m_instance.Init();
                 }
 
                 return m_instance;
@@ -338,15 +337,35 @@ namespace JY.Toon.DB
 
         private void Awake()
         {
-            if (!m_instance)
+            if (m_instance == null)
             {
                 m_instance = this;
                 m_instance.Init();
+            }
+            else if (m_instance != this)
+            {
+                Destroy(gameObject);
             }
         }
 
         public void Init()
         {
+            // 防止内存泄漏
+            if (m_particleTreeInfo.IsCreated)
+                m_particleTreeInfo.Dispose();
+                
+            if (m_particleInfo.IsCreated)
+                m_particleInfo.Dispose();
+                
+            if (m_headInfo.IsCreated)
+                m_headInfo.Dispose();
+                
+            if (m_particleTransformArr.isCreated)
+                m_particleTransformArr.Dispose();
+                
+            if (m_headRootTransform.isCreated)
+                m_headRootTransform.Dispose();
+                
             m_particleTreeInfo = new NativeList<DynamicBoneJY.ParticleTree>(Allocator.Persistent);// 粒子树
 
             m_dynamicBoneList = new List<DynamicBoneJY>();
@@ -576,7 +595,66 @@ namespace JY.Toon.DB
 
             JobHandle.ScheduleBatchedJobs();
         }
+
+        /// <summary>
+        /// 选中时绘制Gizmos
+        /// </summary>
+        void OnDrawGizmos()
+        {
+            if (!EnableGizmos || m_DbDataLen == 0 || 
+                !m_particleInfo.IsCreated || !m_particleTreeInfo.IsCreated || !m_headInfo.IsCreated)
+                return;
+                
+            // 避免线程冲突
+            m_lastJobHandle.Complete();
+            
+            Gizmos.color = Color.white;
+
+            for (int i = 0; i < m_DbDataLen; i++)
+            {
+                if (i >= m_headInfo.Length)
+                    continue;
+                    
+                DynamicBoneJY.HeadInfo curHeadInfo = m_headInfo[i];
+                for (int k = 0; k < curHeadInfo.m_ParticleTreeCount; k++)
+                {
+                    int ptIdx = curHeadInfo.m_jobTreeDataOffset + k;
+                    DynamicBoneJY.ParticleTree pt = m_particleTreeInfo[ptIdx];
+                    DrawGizmos(pt, curHeadInfo, i);
+                }
+            }
+        }
         
+        void DrawGizmos(DynamicBoneJY.ParticleTree pt, DynamicBoneJY.HeadInfo curHeadInfo, int headIndex)
+        {
+            if (pt.m_SingleTreeParticleCount <= 0 || !m_particleTransformArr.isCreated)
+                return;
+                
+            for (int i = 0; i < pt.m_SingleTreeParticleCount; i++)
+            {
+                int pIdx = curHeadInfo.m_jobDataOffset + pt.m_ParticleStartIndex + i;
+                DynamicBoneJY.Particle p = m_particleInfo[pIdx];
+
+                if (p.m_ParentIndex >= 0)
+                {
+                    int p0Idx = curHeadInfo.m_jobDataOffset + p.m_ParentIndex;
+                    DynamicBoneJY.Particle p0 = m_particleInfo[p0Idx];
+                    Gizmos.DrawLine(p.tmpWorldPosition, p0.tmpWorldPosition);
+                }
+                
+                // 添加半径球体绘制
+                if (p.m_Radius > 0)
+                {
+
+                    if (m_particleTransformArr[pIdx].position != Vector3.zero)
+                    {
+                        float objectScale = Mathf.Abs(m_headRootTransform[headIndex].lossyScale.x);
+                        Gizmos.DrawWireSphere(m_particleTransformArr[pIdx].position, p.m_Radius * objectScale);
+                    }
+                }
+            }
+        }
+            
         private void OnDestroy()
         {
             // 完成所有job
