@@ -277,7 +277,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3de2a23853fbcbb4ea8a503860f08db3,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5318262867539943268, guid: 3de2a23853fbcbb4ea8a503860f08db3,
         type: 3}
@@ -622,7 +622,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &143600402
 Transform:
   m_ObjectHideFlags: 0
@@ -1128,7 +1128,7 @@ MonoBehaviour:
   m_EndLength: 0
   m_EndOffset: {x: 0, y: -0.1, z: 0.3}
   m_Gravity: {x: 0, y: 0, z: 0}
-  m_Force: {x: 0.3, y: 0, z: 0}
+  m_Force: {x: 0, y: 0, z: 0}
   m_BlendWeight: 1
   m_Colliders: []
   m_Exclusions: []
@@ -1894,7 +1894,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &465800359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4027,7 +4027,7 @@ MonoBehaviour:
   m_EndLength: 0
   m_EndOffset: {x: 0, y: -0.1, z: 0.3}
   m_Gravity: {x: 0, y: 0, z: 0}
-  m_Force: {x: 0.3, y: 0, z: 0}
+  m_Force: {x: 0, y: 0, z: 0}
   m_BlendWeight: 1
   m_Colliders: []
   m_Exclusions: []

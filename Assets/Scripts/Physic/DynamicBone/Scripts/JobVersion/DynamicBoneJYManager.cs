@@ -10,6 +10,20 @@ namespace JY.Toon.DB
     public class DynamicBoneJYManager : MonoBehaviour
     {
         public bool EnableGizmos = false;
+        
+        [Tooltip("物理更新频率")]
+        public float m_UpdateRate = 60.0f;
+        private float m_Time = 0;
+        
+        public enum UpdateMode
+        {
+            Normal,      // 基于真实时间更新
+            Default,     // 基于帧数更新
+            UnscaledTime // 使用非缩放时间
+        }
+        [Tooltip("物理更新模式")]
+        public UpdateMode m_UpdateMode = UpdateMode.Normal;
+        
         private static DynamicBoneJYManager m_instance;
 
         public static DynamicBoneJYManager Instance
@@ -102,6 +116,7 @@ namespace JY.Toon.DB
             public NativeArray<DynamicBoneJY.HeadInfo> ParticleHeadInfo;
             public NativeArray<DynamicBoneJY.Particle> ParticleInfo;
             public int HeadCount;
+            public float TimeVar;
 
             public void Execute(int index)
             {
@@ -130,7 +145,7 @@ namespace JY.Toon.DB
                         p.m_isCollide = 0;
                     }
 
-                    float3 eForce = curHeadInfo.m_PerFrameForce;
+                    float3 eForce = curHeadInfo.m_PerFrameForce * TimeVar;
                     float3 tmp = ev * (1 - edamping) + eForce + evrmove;
                     p.tmpWorldPosition += tmp;
                 }
@@ -153,6 +168,7 @@ namespace JY.Toon.DB
             public NativeArray<DynamicBoneJY.HeadInfo> ParticleHeadInfo;
             public NativeArray<DynamicBoneJY.Particle> ParticleInfo;
             public int HeadCount;
+            public float TimeVar;
 
             public void Execute(int index)
             {
@@ -211,7 +227,7 @@ namespace JY.Toon.DB
                             }
                             
                             float3 ed = erestPos - p.tmpWorldPosition;
-                            float3 eStepElasticity = ed * p.m_Elasticity;
+                            float3 eStepElasticity = ed * (p.m_Elasticity * TimeVar);
                             p.tmpWorldPosition += eStepElasticity;
 
                             if (stiffness > 0)
@@ -449,7 +465,7 @@ namespace JY.Toon.DB
 
                     int curHeadIndex = target.m_headInfo.GetHeadIndex();
 
-                    //是否是队列中末尾对象
+                    // 是否是队列中末尾对象
                     bool isEndTarget = curHeadIndex == m_headInfo.Length - 1;
                     if (isEndTarget)
                     {
@@ -470,7 +486,7 @@ namespace JY.Toon.DB
                     }
                     else
                     {
-                        //将最末列的HeadInfo 索引设置为当前将要移除的HeadInfo 索引
+                        // 将最末列的HeadInfo 索引设置为当前将要移除的HeadInfo 索引
                         DynamicBoneJY lastTarget = m_dynamicBoneList[m_dynamicBoneList.Count - 1];
 
                         DynamicBoneJY.HeadInfo lastHeadInfo = lastTarget.ResetHeadIndexAndDataOffset(curHeadIndex);
@@ -540,6 +556,60 @@ namespace JY.Toon.DB
                 return;
             }
 
+            // 控制物理计算更新频率
+            float dt = Time.deltaTime;
+            if (m_UpdateMode == UpdateMode.UnscaledTime)
+            {
+                dt = Time.unscaledDeltaTime;
+            }
+
+            // 计算物理更新参数
+            int loop = 1;
+            float timeVar = 1.0f;
+            bool needsUpdate = true;
+
+            if (m_UpdateMode == UpdateMode.Default)
+            {
+               // 在Default模式下，timeVar控制更新步长
+               if (m_UpdateRate > 0)
+               {
+                   timeVar = dt * m_UpdateRate;
+               }
+            }
+            else
+            {
+                // 基于真实时间的物理更新
+                if (m_UpdateRate > 0)
+                {
+                    float frameTime = 1.0f / m_UpdateRate;
+                    m_Time += dt;
+                    loop = 0;
+                    
+                    // 根据时间间隔决定执行物理模拟的次数
+                    while (m_Time >= frameTime)
+                    {
+                        m_Time -= frameTime;
+                        if (++loop >= 3)
+                        {
+                            m_Time = 0;
+                            break;
+                        }
+                    }
+                    
+                    // 如果没有累积足够的时间，则跳过更新
+                    if (loop <= 0)
+                    {
+                        needsUpdate = false;
+                    }
+                }
+            }
+            
+            // 如果不需要更新，则跳过
+            if (!needsUpdate)
+            {
+                return;
+            }
+
             var dataArrLength = m_DbDataLen * DynamicBoneJY.MAX_TRANSFORM_LIMIT;
 
             var rootJob = new RootPosApplyJob
@@ -556,24 +626,32 @@ namespace JY.Toon.DB
                 HeadCount = m_DbDataLen
             };
             var prepareHandle = prepareJob.Schedule(rootHandle);
-
-            var update1Job = new UpdateParticles1Job
-            {
-                ParticleHeadInfo = this.m_headInfo,
-                ParticleInfo = this.m_particleInfo,
-                ParticleTreeInfo = this.m_particleTreeInfo,
-                HeadCount = m_DbDataLen
-            };
-            var update1Handle = update1Job.Schedule(dataArrLength, DynamicBoneJY.MAX_TRANSFORM_LIMIT, prepareHandle);
             
-            var update2Job = new UpdateParticle2Job
+            var handle = prepareHandle;
+            
+            // 根据loop次数执行物理更新
+            for (int i = 0; i < loop; i++)
             {
-                ParticleHeadInfo = this.m_headInfo,
-                ParticleInfo = this.m_particleInfo,
-                ParticleTreeInfo = this.m_particleTreeInfo,
-                HeadCount = m_DbDataLen
-            };
-            var update2Handle = update2Job.Schedule(dataArrLength, DynamicBoneJY.MAX_TRANSFORM_LIMIT, update1Handle);
+                var update1Job = new UpdateParticles1Job
+                {
+                    ParticleHeadInfo = this.m_headInfo,
+                    ParticleInfo = this.m_particleInfo,
+                    ParticleTreeInfo = this.m_particleTreeInfo,
+                    HeadCount = m_DbDataLen,
+                    TimeVar = timeVar
+                };
+                var update1Handle = update1Job.Schedule(dataArrLength, DynamicBoneJY.MAX_TRANSFORM_LIMIT, handle);
+                
+                var update2Job = new UpdateParticle2Job
+                {
+                    ParticleHeadInfo = this.m_headInfo,
+                    ParticleInfo = this.m_particleInfo,
+                    ParticleTreeInfo = this.m_particleTreeInfo,
+                    HeadCount = m_DbDataLen,
+                    TimeVar = timeVar
+                };
+                handle = update2Job.Schedule(dataArrLength, DynamicBoneJY.MAX_TRANSFORM_LIMIT, update1Handle);
+            }
             
             var appTransJob = new ApplyParticleToTransform
             {
@@ -583,7 +661,7 @@ namespace JY.Toon.DB
                 HeadCount = m_DbDataLen
             };
 
-            var appTransHandle = appTransJob.Schedule(dataArrLength, DynamicBoneJY.MAX_TRANSFORM_LIMIT, update2Handle);
+            var appTransHandle = appTransJob.Schedule(dataArrLength, DynamicBoneJY.MAX_TRANSFORM_LIMIT, handle);
             
             var finalJob = new FinalJob
             {
