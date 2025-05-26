@@ -1,6 +1,11 @@
 # JY_ToonProject
-将2025年开始制作的一些卡通渲染相关的个人作品会放在这个工程里
+## 目录
+- [简介](#简介)
+- [星穹铁道调酒效果复刻实现](#星穹铁道调酒效果复刻实现)
+- [DynamicBone多线程优化](#DynamicBone多线程优化)
 
+# 简介
+将2025年开始制作的一些卡通渲染相关的个人作品会放在这个工程里
 
 
 # 星穹铁道调酒效果复刻实现
@@ -387,3 +392,5 @@ UniTask blendMaskTask = BartendingAnimation.MaskAnimationAsync(
 
 本项目仅作为个人学习使用
 如有错误，还请指正
+
+# DynamicBone多线程优化
