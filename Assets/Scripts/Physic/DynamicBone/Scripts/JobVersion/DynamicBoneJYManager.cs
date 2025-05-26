@@ -45,7 +45,9 @@ namespace JY.Toon.DB
         }
 
 
-        // 让子物体不受unity transform的影响
+        /// <summary>
+        /// Job1 让子物体不受unity transform的影响
+        /// </summary>
         [BurstCompile]
         struct RootPosApplyJob : IJobParallelForTransform
         {
@@ -61,6 +63,9 @@ namespace JY.Toon.DB
             }
         }
 
+        /// <summary>
+        /// Job2 让每个树中粒子的位置旋转信息跟随父物体（抛弃unity的transform父子关系）
+        /// </summary>
         [BurstCompile]
         struct PrepareParticleJob : IJob
         {
@@ -106,7 +111,10 @@ namespace JY.Toon.DB
                 }
             }
         }
-        
+
+        /// <summary>
+        /// Job3 物理计算 verlet积分更新位置
+        /// </summary>
         [BurstCompile]
         struct UpdateParticles1Job : IJobParallelFor
         {
@@ -159,6 +167,9 @@ namespace JY.Toon.DB
             }
         }
 
+        /// <summary>
+        /// Job4 物理计算 应用约束
+        /// </summary>
         [BurstCompile]
         struct UpdateParticle2Job : IJobParallelFor
         {
@@ -256,6 +267,9 @@ namespace JY.Toon.DB
             }
         }
 
+        /// <summary>
+        /// Job5 储存粒子的临时位置和旋转
+        /// </summary>
         [BurstCompile]
         struct ApplyParticleToTransform : IJobParallelFor
         {
@@ -322,7 +336,9 @@ namespace JY.Toon.DB
             }
         }
 
-        // 应用transform
+        /// <summary>
+        /// Job6 应用临时位置旋转到transform
+        /// </summary>
         [BurstCompile]
         struct FinalJob : IJobParallelForTransform
         {
@@ -349,7 +365,7 @@ namespace JY.Toon.DB
 
         private Queue<DynamicBoneJY> m_loadingQueue = new Queue<DynamicBoneJY>();
         private Queue<DynamicBoneJY> m_removeQueue = new Queue<DynamicBoneJY>();
-        private Queue<DynamicBoneJY> m_updateQueue = new Queue<DynamicBoneJY>();
+        //private Queue<DynamicBoneJY> m_updateQueue = new Queue<DynamicBoneJY>();
 
         private void Awake()
         {
@@ -366,22 +382,6 @@ namespace JY.Toon.DB
 
         public void Init()
         {
-            // 防止内存泄漏
-            if (m_particleTreeInfo.IsCreated)
-                m_particleTreeInfo.Dispose();
-                
-            if (m_particleInfo.IsCreated)
-                m_particleInfo.Dispose();
-                
-            if (m_headInfo.IsCreated)
-                m_headInfo.Dispose();
-                
-            if (m_particleTransformArr.isCreated)
-                m_particleTransformArr.Dispose();
-                
-            if (m_headRootTransform.isCreated)
-                m_headRootTransform.Dispose();
-                
             m_particleTreeInfo = new NativeList<DynamicBoneJY.ParticleTree>(Allocator.Persistent);// 粒子树
 
             m_dynamicBoneList = new List<DynamicBoneJY>();
@@ -394,8 +394,8 @@ namespace JY.Toon.DB
         // 每帧更新 维护DynamicBoneJY队列
         void UpdateQueue()
         {
-            // 参数变化时更新对应的DynamicBoneJY成员 TODO：暂时不支持动态增删根节点
-            while(m_updateQueue.Count > 0)
+            // 参数变化时更新对应的DynamicBoneJY成员 暂时不支持动态增删根节点
+            /* while(m_updateQueue.Count > 0)
             {
                 DynamicBoneJY target = m_updateQueue.Dequeue();
                 int idx = m_dynamicBoneList.IndexOf(target);
@@ -422,7 +422,7 @@ namespace JY.Toon.DB
                     // 更新根节点
                     m_headRootTransform[idx] = target.m_rootParentTransform;
                 }
-            }
+            } */
             
             while(m_loadingQueue.Count > 0)
             {
@@ -527,10 +527,10 @@ namespace JY.Toon.DB
             m_removeQueue.Enqueue(target);
         }
 
-        public void OnUpdate(DynamicBoneJY target)
+        /* public void OnUpdate(DynamicBoneJY target)
         {
             m_updateQueue.Enqueue(target);
-        }
+        } */
 
         private void Update()
         {
@@ -720,7 +720,7 @@ namespace JY.Toon.DB
                     Gizmos.DrawLine(p.tmpWorldPosition, p0.tmpWorldPosition);
                 }
                 
-                // 添加半径球体绘制
+                // 绘制碰撞半径
                 if (p.m_Radius > 0)
                 {
                     float objectScale = Mathf.Abs(m_headRootTransform[headIndex].lossyScale.x);

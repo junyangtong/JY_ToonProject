@@ -108,16 +108,11 @@ public class DynamicBoneJY : MonoBehaviour
     public bool m_DistantDisable = false;
     public Transform m_ReferenceObject = null;
     public float m_DistanceToObject = 20;
-
-    [HideInInspector]
-    public bool m_Multithread = true;
     public bool useJob = true;
 
     Vector3 m_ObjectMove;
     Vector3 m_ObjectPrevPosition;
     float m_ObjectScale;
-
-    float m_Time = 0;
     float m_Weight = 1.0f;
     bool m_DistantDisabled = false;
     int m_PreUpdateCount = 0;
@@ -186,14 +181,14 @@ public class DynamicBoneJY : MonoBehaviour
         public float3 m_LocalGravity;
         public float4x4 m_RootWorldToLocalMatrix;
         public float m_BoneTotalLength;
-        public int m_ParticleStartIndex;  // 在全局粒子数组中的起始索引
-        public int m_SingleTreeParticleCount;       // 这个树的粒子数量
+        public int m_ParticleStartIndex;                // 在全局粒子数组中的起始索引
+        public int m_SingleTreeParticleCount;           // 当前树的粒子数量
     }
 
     // 全局数据
-    public NativeArray<ParticleTree> m_ParticleTrees;   // 所有粒子树的数据
-    public NativeArray<Particle> m_AllParticles;       // 所有粒子数据
-    public Transform[] m_AllTransforms;                 // 所有Transform引用
+    public NativeArray<ParticleTree> m_ParticleTrees; // 所有粒子树的数据
+    public NativeArray<Particle> m_AllParticles;      // 所有粒子数据
+    public Transform[] m_AllTransforms;               // 所有Transform引用
     public Transform[] m_AllRootParentTransforms;     // 所有根父级Transform引用
     public int m_ParticleTreeCount;
     public int m_AllParticleCount;
@@ -247,7 +242,6 @@ public class DynamicBoneJY : MonoBehaviour
     {
         if (Application.isEditor && Application.isPlaying)
         {
-            m_UpdateRate = Mathf.Max(m_UpdateRate, 0);
             m_Damping = Mathf.Clamp01(m_Damping);
             m_Elasticity = Mathf.Clamp01(m_Elasticity);
             m_Stiffness = Mathf.Clamp01(m_Stiffness);
@@ -255,24 +249,12 @@ public class DynamicBoneJY : MonoBehaviour
             m_Friction = Mathf.Clamp01(m_Friction);
             m_Radius = Mathf.Max(m_Radius, 0);
 
-            if (IsRootChanged())
-            {
-                InitTransforms();
-                SetupParticles();
-            }
-            else
-            {
-                if (!m_AllParticles.IsCreated || !m_ParticleTrees.IsCreated)
-                {
-                    SetupParticles();
-                }
-                UpdateParameters();
-            }
+            UpdateParameters();
+            
             DynamicBoneJYManager.Instance.OnUpdate(this);
         }
-        
-    } */
-
+    }
+ */
     bool IsRootChanged()
     {
         var roots = new List<Transform>();
