@@ -394,3 +394,8 @@ UniTask blendMaskTask = BartendingAnimation.MaskAnimationAsync(
 如有错误，还请指正
 
 # DynamicBone多线程优化
+pc测试速度提升5-6倍
+![image](https://github.com/user-attachments/assets/cd2ee7e2-6566-455d-92b9-eaee05f18688)
+![bar2](https://github.com/user-attachments/assets/a7a007a4-f7e8-4a66-9687-6fe6d5aced66)
+![bar2](https://github.com/user-attachments/assets/1b98defa-097a-43dd-964c-94deb8e64a13)
+
