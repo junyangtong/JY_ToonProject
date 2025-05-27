@@ -388,14 +388,19 @@ UniTask blendMaskTask = BartendingAnimation.MaskAnimationAsync(
 
 平面方程不能很好的模拟液体波动比较大时的水面，更精致的模拟可以用raymarching？
 
-## 最后
+<br><br>
+
+# DynamicBone多线程优化
+使用unity jobsystem 做了多线程优化
+
+![bar2](https://github.com/user-attachments/assets/a7a007a4-f7e8-4a66-9687-6fe6d5aced66)
+pc测试速度提升5-6倍（下图左边是优化后，右边是优化前，在上面场景中测试对比耗时）
+![image](https://github.com/user-attachments/assets/cd2ee7e2-6566-455d-92b9-eaee05f18688)
+
+![bar2](https://github.com/user-attachments/assets/1b98defa-097a-43dd-964c-94deb8e64a13)
+
+
+# 最后
 
 本项目仅作为个人学习使用
 如有错误，还请指正
-
-# DynamicBone多线程优化
-pc测试速度提升5-6倍
-![image](https://github.com/user-attachments/assets/cd2ee7e2-6566-455d-92b9-eaee05f18688)
-![bar2](https://github.com/user-attachments/assets/a7a007a4-f7e8-4a66-9687-6fe6d5aced66)
-![bar2](https://github.com/user-attachments/assets/1b98defa-097a-43dd-964c-94deb8e64a13)
-
